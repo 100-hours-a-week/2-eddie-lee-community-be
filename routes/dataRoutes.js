@@ -4,7 +4,7 @@ import * as userModel from '../models/userModel.js';
 
 const dataRouter = express.Router();
 
-dataRouter.get('/posts', postModel.getAllPostData);
+dataRouter.get('/posts', postModel.getPosts);
 dataRouter.get('/posts/:postId', postModel.getSpecificPostData);
 dataRouter.get('/posts/:postId/comments/:commentId', postModel.getComment);
 dataRouter.get('/comments', postModel.getComments);

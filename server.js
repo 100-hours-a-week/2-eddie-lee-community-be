@@ -9,12 +9,12 @@ import dataRouter from './routes/dataRoutes.js';
 dotenv.config();
 const port = 3000;
 const router = express.Router();
-
+app.use(router);
 router.use('/users', userRouter);
 router.use('/posts', postRouter);
 router.use('/auth', authRouter);
 router.use('/data', dataRouter);
 
 app.listen(port, () => {
-    console.log('Server is running on port 3000');
+    console.log(`Server is running on port ${port}`);
 });
