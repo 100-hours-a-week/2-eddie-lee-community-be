@@ -6,7 +6,7 @@ const postRouter = express.Router();
 
 //GET
 postRouter.get('/:postId/data', postController.resPostData);
-postRouter.get('/:postId/comments', postController.getComments);
+postRouter.get('/:postId/comments', postController.getPostComments);
 postRouter.get('/:postId/comments/:commentId', postController.getCommentData);
 
 //POST

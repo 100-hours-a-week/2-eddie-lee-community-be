@@ -20,49 +20,29 @@ function formatTimestamp(timestamp) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-async function getData(dataType) {
-    try {
-        const data = await fetch(`${baseUrl}/data/${dataType}`);
-        return data.json();
-    } catch (err) {
-        console.error(`get ${dataType} failed...\n ${err.message}`);
-    }
-}
-
-function updateData(dataType, dataArray) {
-    try {
-        fs.writeFileSync(
-            `${rootDir}/data/${dataType}DummyData.json`,
-            JSON.stringify(dataArray),
-            'utf8',
-        );
-    } catch (err) {
-        console.error(`write ${dataType} failed..\n${err.message}`);
-    }
-}
-
 //GET
 export const resPostData = async (req, res) => {
     const postId = req.params.postId;
+    try {
+        const getPostData = await fetch(`${baseUrl}/data/posts/${postId}`);
+        const postData = await getPostData.json();
 
-    console.log(postId);
-    const postData = await fetch(postFilePath)
-        .then(res => res.json())
-        .then(getAllPost => {
-            return getAllPost.find(post => post.post_id == postId);
-        })
-        .catch(error => console.error(error));
-
-    res.status(200).json(postData);
+        res.status(200).json(postData);
+    } catch (err) {
+        res.status(404).json({
+            message: 'Get post data failed..',
+            data: err.message,
+        });
+    }
 };
 
-export const getComments = async (req, res) => {
+export const getPostComments = async (req, res) => {
     try {
         const postId = req.params.postId;
-        const comments = getData('comments');
-        const postComments = comments.filter(
-            comment => comment.post_id === postId,
+        const getPostCommentsData = await fetch(
+            `${baseUrl}/data/posts/${postId}/comments`,
         );
+        const postComments = await getPostCommentsData.json();
         res.status(200).json(postComments);
     } catch {
         res.status(500).json({ message: 'internal_server_error', data: null });
@@ -82,189 +62,178 @@ export const getCommentData = async (req, res) => {
 
 //POST
 export const getPostList = async (req, res) => {
-    const offset = req.body.offset;
-    let postArr = [];
-    const postList = await fetch(postFilePath)
-        .then(res => res.json())
-        .then(postList => {
-            for (let i = 0; i < 10; i++) {
-                if (offset + i > postList.length) {
-                    return;
-                }
-                postArr.push(postList[offset + i]);
-            }
-        })
-        .catch(error => res.status(500).json({ message: '데이터 전송 실패' }));
-
-    res.status(200).json(postArr);
+    try {
+        const offset = req.body.offset;
+        let postArr = [];
+        const getPostData = await fetch(
+            `${baseUrl}/data/posts?offset=${offset}`,
+        );
+        const getResult = await getPostData.json();
+        const getOffset = getResult.offset;
+        const postList = getResult.data;
+        res.status(201).json({ offset: getOffset, data: postList });
+    } catch (err) {
+        res.status(404).json({
+            message: 'Get post list Failed...',
+            data: err.message,
+        });
+    }
 };
 
 export const editPost = async (req, res) => {
-    const postData = req.body;
-    const time = Date.now();
-    const timestamp = formatTimestamp(time);
-    const fileData = req.file
-        ? `/public/images/postImages/${req.file.filename}`
-        : '/public/assets/images/defaultPostImg.png';
-
-    const getUserData = await fetch(`${baseUrl}/data/userDummyData.json`).then(
-        res => res.json(),
-    );
-
-    const user = getUserData.find(
-        findUser => findUser.user_id == postData.userId,
-    );
-    const postObj = {
-        user_id: postData.userId,
-        post_id: Date.now().toString(),
-        profile_img: user.profile_img,
-        nickname: user.nickname,
-        title: postData.title,
-        content: postData.content,
-        image: fileData,
-        timestamp: timestamp,
-        like: 0,
-        view: 0,
-        comment_count: 0,
-    };
-    const originPostFile = await fetch(`${baseUrl}/data/posts`)
-        .then(res => res.json())
-        .catch(error => console.error(`데이터 가져오기 실패: ${error}`));
-
-    originPostFile.push(postObj);
     try {
-        fs.writeFileSync(
-            `${rootDir}/data/postDummyData.json`,
-            JSON.stringify(originPostFile),
+        const postData = req.body;
+        const time = Date.now();
+        const timestamp = formatTimestamp(time);
+        const fileData = req.file
+            ? `/public/images/postImages/${req.file.filename}`
+            : '/public/assets/images/defaultPostImg.png';
+
+        const getUserData = await fetch(
+            `${baseUrl}/data/users/${postData.userId}`,
         );
-        res.status(200).send('데이터 추가 완료');
+        const user = await getUserData.json();
+
+        const postObj = {
+            user_id: postData.userId,
+            post_id: Date.now().toString(),
+            profile_img: user.profile_img,
+            nickname: user.nickname,
+            title: postData.title,
+            content: postData.content,
+            image: fileData,
+            timestamp: timestamp,
+            like: 0,
+            view: 0,
+            comment_count: 0,
+        };
+        const result = await fetch(`${baseUrl}/data/posts`, {
+            method: 'POST',
+            body: JSON.stringify(postObj),
+            headers: { 'Content-Type': 'application/json' },
+        })
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error(`Add post err`);
+                }
+            })
+            .then(data => console.log(data));
+        res.status(200).json({
+            message: 'update posts success',
+            data: result,
+        });
     } catch (error) {
-        res.status(500).send('데이터 추가 실패');
+        res.status(500).json({
+            message: 'update posts failed..',
+            data: error.message,
+        });
     }
 };
 
 export const editComment = async (req, res) => {
-    const userId = req.body.userId;
-    const comment = req.body.comment;
-    const postId = req.params.postId;
-    const user = await fetch(`${baseUrl}/data/users`)
-        .then(res => res.json())
-        .then(users => {
-            const user = users.find(user => user.user_id === userId);
-            return user;
-        })
-        .catch(error => console.error(`데이터 가져오기 에러${error}`));
-    const newComment = {
-        user_id: userId,
-        profile_img: user.profile_img,
-        nickname: user.nickname,
-        post_id: postId,
-        comment_id: Date.now().toString(),
-        timestamp: formatTimestamp(Date.now()),
-        comment_content: comment,
-    };
-    const originCommentFile = await fetch(`${baseUrl}/data/comments`)
-        .then(res => res.json())
-        .catch(error => console.error(`데이터 가져오기 실패: ${error}`));
-
-    originCommentFile.push(newComment);
     try {
-        fs.writeFileSync(
-            `${rootDir}/data/commentDummyData.json`,
-            JSON.stringify(originCommentFile),
-        );
-        //댓글 개수 증가
-        await fetch(`${baseUrl}/posts/${postId}/comment`, {
-            method: 'PATCH',
-            body: JSON.stringify({ addOrReduce: 'add' }),
+        const userId = req.body.userId;
+        const comment = req.body.comment;
+        const postId = req.params.postId;
+        const user = await fetch(`${baseUrl}/data/users/${userId}`)
+            .then(res => res.json())
+            .catch(error => console.error(`데이터 가져오기 에러${error}`));
+        const newComment = {
+            user_id: userId,
+            profile_img: user.profile_img,
+            nickname: user.nickname,
+            post_id: postId,
+            comment_id: Date.now().toString(),
+            timestamp: formatTimestamp(Date.now()),
+            comment_content: comment,
+        };
+        const result = await fetch(`${baseUrl}/data/comments`, {
+            method: 'POST',
+            body: JSON.stringify(newComment),
             headers: { 'Content-Type': 'application/json' },
         })
-            .then(async res => {
-                const resData = await res.json();
-                res.ok
-                    ? console.log(
-                          `status code: ${res.status}, data: ${resData}`,
-                      )
-                    : console.error(
-                          `status code: ${res.status}, data: ${resData}`,
-                      );
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error(`Add post err`);
+                }
             })
-            .catch(err => console.error(err));
+            .then(data => console.log(data));
+
         res.status(200).json({
-            message: 'Data add complete',
-            data: newComment,
+            message: 'update comments success',
+            data: null,
         });
     } catch (error) {
-        res.status(500).send('데이터 추가 실패');
+        res.status(404).json({
+            message: 'update comments failed..',
+            data: error.message,
+        });
     }
 };
 
 //PATCH
 export const modifyPost = async (req, res) => {
-    const postId = req.params.postId;
-    const reqPostData = req.body;
-    const postImg = req.file
-        ? `/public/images/postImages/${req.file.filename}`
-        : '/public/assets/images/defaultPostImg.png';
-
-    let posts = [];
     try {
-        const reqData = await fetch(`${baseUrl}/data/posts`);
-        posts = await reqData.json();
-    } catch (err) {
-        console.error(`데이터 가져오기 실패, 에러메시지 : ${err}`);
-    }
-    try {
-        const updatePosts = posts.map(post =>
-            post.post_id === postId
-                ? {
-                      ...post,
-                      title: reqPostData.title,
-                      content: reqPostData.content,
-                      image: postImg,
-                  }
-                : post,
-        );
+        const postId = req.params.postId;
+        const reqPostData = req.body;
+        const postImg = req.file
+            ? `/public/images/postImages/${req.file.filename}`
+            : '/public/assets/images/defaultPostImg.png';
 
-        fs.writeFileSync(
-            `${rootDir}/data/postDummyData.json`,
-            JSON.stringify(updatePosts, null, 2),
-            'utf8',
-        );
+        const modifyPostData = {
+            postId: postId,
+            title: reqPostData.title,
+            content: reqPostData.content,
+            image: postImg,
+        };
+        const reqData = await fetch(`${baseUrl}/data/posts`, {
+            method: 'PATCH',
+            body: JSON.stringify(modifyPostData),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
         res.status(200).json({
-            message: 'Data modify complete',
-            data: req.body,
+            message: 'update post success',
+            data: null,
         });
     } catch (err) {
         console.error(err);
-        res.status(404).json({ result: '게시글 수정 실패', message: err });
+        res.status(404).json({
+            message: 'update post failed..',
+            data: err.message,
+        });
     }
 };
 
 export const modifyComment = async (req, res) => {
-    const postId = req.params.postId;
-    const commentId = req.params.commentId;
-    const commentData = await fetch(`${baseUrl}/data/comments`).catch(error =>
-        console.error(error),
-    );
-    const comments = await commentData.json();
-    const updateComments = comments.map(comment =>
-        comment.post_id === postId && comment.comment_id === commentId
-            ? { ...comment, comment_content: req.body.comment_content }
-            : comment,
-    );
     try {
-        fs.writeFileSync(
-            `${rootDir}/data/commentDummyData.json`,
-            JSON.stringify(updateComments),
-            'utf8',
-        );
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        const commentData = await fetch(`${baseUrl}/data/comments`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                postId: postId,
+                commentId: commentId,
+                comment_content: req.body.comment_content,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
         res.status(200).json({
             message: 'Data modify complete',
-            data: req.body,
+            data: null,
         });
     } catch (error) {
-        res.status(500).json({ message: 'data modify Failed...' });
+        res.status(500).json({
+            message: 'data modify Failed...',
+            data: error.message,
+        });
     }
 };
 

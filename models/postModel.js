@@ -1,11 +1,14 @@
 import env from '../config/dotenv.js';
-import fs from 'fs';
+import fs, { writeFile } from 'fs';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
 
 function getData(dataType) {
     try {
+        if (dataType !== 'comment' && dataType !== 'post') {
+            throw new Error('invalid type');
+        }
         const data = fs.readFileSync(
             `${rootDir}/data/${dataType}DummyData.json`,
         );
@@ -15,21 +18,88 @@ function getData(dataType) {
     }
 }
 
+function writeData(dataType, data) {
+    try {
+        fs.copyFileSync(
+            `${rootDir}/data/${dataType}DummyData.json`,
+            `${rootDir}/data/${dataType}DummyData_bu.json`,
+        );
+        fs.writeFileSync(
+            `${rootDir}/data/${dataType}DummyData.json`,
+            JSON.stringify(data),
+            'utf8',
+        );
+        return true;
+    } catch (err) {
+        console.log(err.message);
+    }
+}
+
 //GET
-export const getPosts = async (req, res) => {
-    {
-        try {
-            res.status(200).json(getData('post'));
-        } catch (e) {
-            res.status(404).json({
-                result: '전체 게시글 데이터 가져오기 실패',
-                message: e.message,
-            });
+export const sendPosts = async (req, res) => {
+    try {
+        const getOffset = req.query.offset;
+        let offset = parseInt(getOffset);
+        const getPosts = getData('post');
+        console.log(`${getPosts[0]}`);
+        console.log(getPosts[0]);
+        const result = [];
+        for (let i = 0; i < 10; i++) {
+            if (offset !== getPosts.length) {
+                console.log(offset);
+                console.log(`${getPosts[offset]}`);
+                result.push(getPosts[offset++]);
+            } else {
+                break;
+            }
         }
+        res.status(200).json({ offset: offset, data: result });
+    } catch (e) {
+        res.status(404).json({
+            result: 'Get post list Failed...',
+            message: e.message,
+        });
     }
 };
 
-export const getComment = async (req, res) => {
+export const sendSpecificPostData = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const postData = getData('post');
+        const specificPost = postData.find(post => post.post_id === postId);
+        if (specificPost) {
+            res.status(200).json(specificPost);
+        } else {
+            res.status(404).json({
+                result: 'Not Found',
+                message: "Can't get post",
+            });
+        }
+    } catch (e) {
+        res.status(404).json({
+            result: '게시물 정보 가져오기 실패',
+            message: e.message,
+        });
+    }
+};
+
+export const sendPostComments = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const getCommentsData = getData('comment');
+        const comments = getCommentsData.filter(
+            comment => comment.post_id === postId,
+        );
+        res.status(200).json(comments);
+    } catch (err) {
+        res.status(404).json({
+            message: 'get comments failed',
+            data: null,
+        });
+    }
+};
+
+export const sendComment = async (req, res) => {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
     const comments = getData('comment');
@@ -46,7 +116,7 @@ export const getComment = async (req, res) => {
     }
 };
 
-export const getComments = async (req, res) => {
+export const sendComments = async (req, res) => {
     const comments = getData('comment');
 
     if (comments) {
@@ -59,23 +129,101 @@ export const getComments = async (req, res) => {
     }
 };
 
-export const getSpecificPostData = async (req, res) => {
+//POST
+export const addPost = async (req, res) => {
     try {
-        const postId = req.params.postId;
-        const postData = getData('post');
-        const specificPost = postData.find(post => post.post_id === postId);
-        if (specificPost !== undefined) {
-            res.status(200).json(specificPost);
-        } else {
-            res.status(404).json({
-                result: 'Not Found',
-                message: "Can't get post",
-            });
-        }
-    } catch (e) {
+        const posts = getData('post');
+        const newPost = req.body;
+        posts.push(newPost);
+        writeData('post', posts);
+        res.status(201).json({
+            message: 'update posts success',
+            data: null,
+        });
+    } catch (err) {
         res.status(404).json({
-            result: '게시물 정보 가져오기 실패',
-            message: e.message,
+            message: 'update posts failed...',
+            data: null,
+        });
+    }
+};
+
+export const addComment = async (req, res) => {
+    try {
+        const comments = getData('comment');
+        const newComment = req.body;
+        comments.push(newComment);
+        writeData('comment', comments);
+        //댓글 개수 증가
+        const posts = getData('post');
+        const updatePosts = posts.map(post =>
+            post.post_id === newComment.post_id
+                ? { ...post, comment_count: ++post.comment_count }
+                : post,
+        );
+        writeData('post', updatePosts);
+        res.status(201).json({
+            message: 'update comments success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'update comments failed...',
+            data: err.message,
+        });
+    }
+};
+
+//PATCH
+export const updatePosts = async (req, res) => {
+    try {
+        const newPostData = req.body;
+        const getPostData = getData('post');
+        const posts = getPostData.map(post =>
+            post.post_id === newPostData.postId
+                ? {
+                      ...post,
+                      title: newPostData.title,
+                      content: newPostData.content,
+                      image: newPostData.postImg,
+                  }
+                : post,
+        );
+        writeData('post', posts);
+        res.status(200).json({
+            message: 'update post success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'update post failed..',
+            data: err.message,
+        });
+    }
+};
+
+export const updateComments = async (req, res) => {
+    try {
+        const newCommentData = req.body;
+        const getCommentData = getData('comment');
+        const comments = getCommentData.map(comment =>
+            comment.post_id === newCommentData.postId &&
+            comment.comment_id === newCommentData.commentId
+                ? {
+                      ...comment,
+                      comment_content: newCommentData.comment_content,
+                  }
+                : comment,
+        );
+        writeData('comment', comments);
+        res.status(200).json({
+            message: 'update comment success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'update post failed..',
+            data: err.message,
         });
     }
 };

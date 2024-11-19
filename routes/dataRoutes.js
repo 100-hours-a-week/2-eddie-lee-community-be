@@ -4,10 +4,20 @@ import * as userModel from '../models/userModel.js';
 
 const dataRouter = express.Router();
 
-dataRouter.get('/posts', postModel.getPosts);
-dataRouter.get('/posts/:postId', postModel.getSpecificPostData);
-dataRouter.get('/posts/:postId/comments/:commentId', postModel.getComment);
-dataRouter.get('/comments', postModel.getComments);
-dataRouter.get('/users', userModel.getUsers);
+//GET
+dataRouter.get('/posts', postModel.sendPosts);
+dataRouter.get('/posts/:postId', postModel.sendSpecificPostData);
+dataRouter.get('/posts/:postId/comments', postModel.sendPostComments);
+dataRouter.get('/posts/:postId/comments/:commentId', postModel.sendComment);
+dataRouter.get('/comments', postModel.sendComments);
+dataRouter.get('/users/:userId', userModel.sendUsers);
+
+//POST
+dataRouter.post('/posts', postModel.addPost);
+dataRouter.post('/comments', postModel.addComment);
+
+//PATCH
+dataRouter.patch('/posts', postModel.updatePosts);
+dataRouter.patch('/comments', postModel.updateComments);
 
 export default dataRouter;
