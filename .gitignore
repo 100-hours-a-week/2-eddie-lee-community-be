@@ -188,14 +188,6 @@ node_modules
 
 # dummyData
 
-/public/dummyData
-
-userDummyData.json
-
-postDummyData.json
-
-commentDummyData.json
-
-dummyMaker.js
+/data
 
 .vscode
