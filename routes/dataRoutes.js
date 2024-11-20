@@ -10,11 +10,12 @@ dataRouter.get('/posts/:postId', postModel.sendSpecificPostData);
 dataRouter.get('/posts/:postId/comments', postModel.sendPostComments);
 dataRouter.get('/posts/:postId/comments/:commentId', postModel.sendComment);
 dataRouter.get('/comments', postModel.sendComments);
-dataRouter.get('/users/:userId', userModel.sendUsers);
 
 //POST
 dataRouter.post('/posts', postModel.addPost);
 dataRouter.post('/comments', postModel.addComment);
+dataRouter.post('/auth/signup', userModel.signup);
+dataRouter.post('/user', userModel.sendUser);
 
 //PATCH
 dataRouter.patch('/posts', postModel.updatePosts);

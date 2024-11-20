@@ -9,69 +9,80 @@ export const login = async (req, res) => {
     const loginInfo = req.body;
     const email = loginInfo.email;
     const passwd = loginInfo.passwd;
-    let users = [];
     try {
-        const getUsers = await fetch(`${baseUrl}/data/users`);
-        users = await getUsers.json();
-    } catch (error) {
-        console.error('Error fetching user data:', error);
+        const authUser = await fetch(`${baseUrl}/data/user`, {
+            method: 'POST',
+            body: JSON.stringify({ email: email, passwd: passwd }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(async res => {
+            if (res.ok) {
+                return await res.json();
+            } else {
+                throw new Error(`auth user failed.. invalid response`);
+            }
+        });
+        if (!authUser) {
+            console.log('login failed');
+            res.status(401).json({
+                message: 'no user exist.',
+                login_result: 'failed',
+            });
+        } else {
+            console.log('login success');
+            req.session.user = {
+                userId: authUser.user_id,
+                userNickname: authUser.nickname,
+                userProfileImg: authUser.profile_img,
+                userEmail: authUser.email,
+            };
+            res.status(200).json({
+                message: 'Login success',
+                data: null,
+            });
+        }
+    } catch (err) {
+        console.error('Error fetching user data:', err.message);
         return res.status(500).json({ message: 'Internal server error' });
-    }
-    const user = users.find(
-        findUser => findUser.email === email && findUser.passwd === passwd,
-    );
-    if (!user) {
-        console.log('login failed');
-        res.status(404).json({
-            message: 'no user exist.',
-            login_result: 'failed',
-        });
-    } else {
-        console.log('login success');
-        req.session.user = {
-            userId: user.user_id,
-            userNickname: user.nickname,
-            userProfileImg: user.profile_img,
-            userEmail: user.email,
-        };
-
-        res.status(200).json({
-            message: 'Login success',
-            user: req.session.user,
-        });
     }
 };
 
 export const signup = async (req, res) => {
-    const textData = req.body;
-    let fileData = req.file; // 파일이 없으면 undefined가 됩니다
-
-    if (!fileData) {
-        fileData = '/public/images/profile_img.webp';
-    } else {
-        const filePath = `/public/userPhotos/${req.file.filename}`;
-        fileData = filePath;
-    }
-
-    const addUserData = {
-        user_id: Date.now().toString(),
-        profile_img: fileData,
-        email: textData.email,
-        passwd: textData.passwd,
-        nickname: textData.nickname,
-    };
-    const originData = await fetch(`${baseUrl}/data/userDummyData.json`)
-        .then(res => res.json())
-        .catch(error => console.error(`데이터 가져오기 실패: ${error}`));
-    originData.push(addUserData);
-    console.log(originData);
     try {
-        fs.writeFileSync(
-            `${rootDir}/data/userDummyData.json`,
-            JSON.stringify(originData, null, 2),
-        );
-        res.status(200).send('데이터 추가 완료');
-    } catch (error) {
-        res.status(500).send('데이터 추가 실패');
+        const textData = req.body;
+        const fileData = req.file
+            ? `/public/userPhotos/${req.file.filename}`
+            : `${rootDir}/public/assets/profile_img.webp`;
+
+        const addUserData = {
+            user_id: Date.now().toString(),
+            profile_img: fileData,
+            email: textData.email,
+            passwd: textData.passwd,
+            nickname: textData.nickname,
+        };
+        await fetch(`${baseUrl}/data/auth/signup`, {
+            method: 'POST',
+            body: JSON.stringify(addUserData),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(async res => {
+            if (res.ok) {
+                return await res.json();
+            } else {
+                throw new Error(`sign up fail`);
+            }
+        });
+        res.status(200).json({
+            message: 'signup success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'signup success',
+            data: err.message,
+        });
     }
 };
