@@ -227,3 +227,95 @@ export const updateComments = async (req, res) => {
         });
     }
 };
+
+export const updateView = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const getPostData = getData('post');
+        const posts = getPostData.map(post =>
+            post.post_id === postId ? { ...post, view: ++post.view } : post,
+        );
+        writeData('post', posts);
+        res.status(200).json({
+            message: 'update view success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'update view failed..',
+            data: err.message,
+        });
+    }
+};
+
+export const updateLike = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const getPostData = getData('post');
+        const posts = getPostData.map(post =>
+            post.post_id === postId ? { ...post, like: ++post.like } : post,
+        );
+        writeData('post', posts);
+        res.status(200).json({
+            message: 'update like success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'update like failed..',
+            data: err.message,
+        });
+    }
+};
+
+export const deletePost = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const getCommentData = getData('comment');
+        const comments = getCommentData.filter(
+            comment => comment.post_id !== postId,
+        );
+        writeData('comment', comments);
+        const getPostData = getData('post');
+        const posts = getPostData.filter(post => post.post_id !== postId);
+        writeData('post', posts);
+        res.status(200).json({
+            message: 'delete post success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'delete post failed..',
+            data: err.message,
+        });
+    }
+};
+
+export const deleteComment = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        const getCommentData = getData('comment');
+        const comments = getCommentData.filter(
+            comment =>
+                comment.comment_id != commentId || comment.post_id != postId,
+        );
+        writeData('comment', comments);
+        const getPostData = getData('post');
+        const posts = getPostData.map(post =>
+            post.post_id === postId
+                ? { ...post, comment_count: --post.comment_count }
+                : post,
+        );
+        writeData('post', posts);
+        res.status(200).json({
+            message: 'delete comment success',
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'delete comment failed..',
+            data: err.message,
+        });
+    }
+};

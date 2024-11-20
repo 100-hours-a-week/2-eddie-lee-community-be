@@ -27,7 +27,6 @@ postRouter.patch(
 );
 postRouter.patch('/:postId/comments/:commentId', postController.modifyComment);
 postRouter.patch('/:postId/view', postController.updateView);
-postRouter.patch('/:postId/comment', postController.updateCommentCount);
 postRouter.patch('/:postId/like', postController.updateLike);
 
 //DELETE

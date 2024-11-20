@@ -19,5 +19,14 @@ dataRouter.post('/comments', postModel.addComment);
 //PATCH
 dataRouter.patch('/posts', postModel.updatePosts);
 dataRouter.patch('/comments', postModel.updateComments);
+dataRouter.patch('/posts/:postId/view', postModel.updateView);
+dataRouter.patch('/posts/:postId/like', postModel.updateLike);
+
+//DELETE
+dataRouter.delete('/posts/:postId', postModel.deletePost);
+dataRouter.delete(
+    '/posts/:postId/comments/:commentId',
+    postModel.deleteComment,
+);
 
 export default dataRouter;

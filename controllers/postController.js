@@ -239,101 +239,26 @@ export const modifyComment = async (req, res) => {
 
 export const updateView = async (req, res) => {
     const postId = req.params.postId;
-    let error = '';
     try {
-        const updatePosts = await fetch(`${baseUrl}/data/posts`)
-            .then(res => res.json())
-            .then(posts => {
-                const modifyPosts = posts.map(post =>
-                    post.post_id === postId
-                        ? { ...post, view: ++post.view }
-                        : post,
-                );
-
-                return modifyPosts;
-            })
-            .catch(err => {
-                console.error(err);
-                error = {
-                    result: 'Get all post failed..',
-                    message: err.message,
-                };
-            });
-
-        try {
-            fs.writeFileSync(
-                `${rootDir}/data/postDummyData.json`,
-                JSON.stringify(updatePosts),
-                'utf8',
-            );
-        } catch (err) {
-            throw new Error(`File write err: ${err.message}`);
-        }
-
-        res.status(200).json({ result: 'Update view complete', message: null });
-    } catch (err) {
-        res.status(404).json({
-            result: 'Update view failed..',
-            message: err.message,
-        });
-    }
-};
-
-export const updateCommentCount = async (req, res) => {
-    const postId = req.params.postId;
-    const { addOrReduce } = req.body;
-    const posts = await fetch(`${baseUrl}/data/posts`)
-        .then(async res => {
-            const data = await res.json();
-            let updateCommentCounts;
-            if (res.ok) {
-                switch (addOrReduce) {
-                    case 'add':
-                        updateCommentCounts = data.map(post =>
-                            post.post_id === postId
-                                ? {
-                                      ...post,
-                                      comment_count: ++post.comment_count,
-                                  }
-                                : post,
-                        );
-                        break;
-                    case 'reduce':
-                        updateCommentCounts = data.map(post =>
-                            post.post_id === postId
-                                ? {
-                                      ...post,
-                                      comment_count: --post.comment_count,
-                                  }
-                                : post,
-                        );
-                        break;
-                    default:
-                        res.status(404).json({
-                            result: 'update comment count failed..',
-                            message: 'add or reduce failed..',
-                        });
-                        break;
+        const updatePosts = await fetch(
+            `${baseUrl}/data/posts/${postId}/view`,
+            {
+                method: 'PATCH',
+            },
+        )
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error(`update view fail`);
                 }
-                return updateCommentCounts;
-            }
-        })
-        .catch(error => console.error(error));
-
-    try {
-        fs.writeFileSync(
-            `${rootDir}/data/postDummyData.json`,
-            JSON.stringify(posts),
-            'utf8',
-        );
-        res.status(200).json({
-            result: 'update comment count success',
-            message: null,
-        });
+            })
+            .then(data => console.log(data));
+        res.status(200).json({ message: 'Update view complete', data: null });
     } catch (err) {
         res.status(404).json({
-            result: 'update comment count failed..',
-            message: err,
+            message: 'Update view failed..',
+            data: err.message,
         });
     }
 };
@@ -341,102 +266,82 @@ export const updateCommentCount = async (req, res) => {
 export const updateLike = async (req, res) => {
     const postId = req.params.postId;
     try {
-        const updatePosts = await fetch(`${baseUrl}/data/posts`)
-            .then(res => res.json())
-            .then(posts => {
-                const modifyPosts = posts.map(post =>
-                    post.post_id === postId
-                        ? { ...post, like: ++post.like }
-                        : post,
-                );
-
-                return modifyPosts;
+        const updatePosts = await fetch(
+            `${baseUrl}/data/posts/${postId}/like`,
+            {
+                method: 'PATCH',
+            },
+        )
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error(`update view fail`);
+                }
             })
-            .catch(err => {
-                console.error(err);
-                error = {
-                    result: 'Get all post failed..',
-                    message: err.message,
-                };
-            });
-
-        try {
-            fs.writeFileSync(
-                `${rootDirname}/public/dummyData/postDummyData.json`,
-                JSON.stringify(updatePosts),
-                'utf8',
-            );
-        } catch (err) {
-            throw new Error(`File write err: ${err.message}`);
-        }
-
-        res.status(200).json({ result: 'Update view complete', message: null });
+            .then(data => console.log(data));
+        res.status(200).json({
+            message: 'like increase success',
+            data: null,
+        });
     } catch (err) {
         res.status(404).json({
-            result: 'Update view failed..',
-            message: err.message,
+            message: 'like increase failed..',
+            data: err.message,
         });
     }
 };
 
 //DELETE
 export const deletePost = async (req, res) => {
-    const postId = req.params.postId;
-    const posts = await fetch('http://localhost:3000/data/posts')
-        .then(res => res.json())
-        .catch(error => console.error(error));
-    const deletePosts = posts.filter(post => post.post_id != postId);
-
     try {
-        fs.writeFileSync(
-            `${rootDirname}/public/dummyData/postDummyData.json`,
-            JSON.stringify(deletePosts),
-            'utf8',
-        );
-        res.status(200).json({ result: '게시물 삭제 성공', message: null });
+        const postId = req.params.postId;
+        await fetch(`${baseUrl}/data/posts/${postId}`, {
+            method: 'DELETE',
+        })
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error(`delete post fail`);
+                }
+            })
+            .then(data => console.log(data));
+        res.status(200).json({
+            message: 'delete post success',
+            data: null,
+        });
     } catch (error) {
-        res.status(404).json({ result: '게시물 삭제 실패', message: error });
+        res.status(404).json({
+            message: 'delete post failed',
+            data: error.message,
+        });
     }
 };
 
 export const deleteComment = async (req, res) => {
-    const postId = req.params.postId;
-    const commentId = req.params.commentId;
-    const commentData = await fetch(
-        'http://localhost:3000/data/comments',
-    ).catch(error => console.error(error));
-    const comments = await commentData.json();
-    const deleteComments = comments.filter(
-        comment => comment.comment_id != commentId || comment.post_id != postId,
-    );
     try {
-        fs.writeFileSync(
-            `${rootDirname}/public/dummyData/commentDummyData.json`,
-            JSON.stringify(deleteComments),
-        );
-        //댓글 개수 감소
-        await fetch(`http://localhost:3000/posts/${postId}/comment`, {
-            method: 'PATCH',
-            body: JSON.stringify({ addOrReduce: 'reduce' }),
-            headers: { 'Content-Type': 'application/json' },
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        await fetch(`${baseUrl}/data/posts/${postId}/comments/${commentId}`, {
+            method: 'DELETE',
         })
-            .then(async res => {
-                const statusCode = res.status;
-                const resData = await res.json();
+            .then(res => {
                 if (res.ok) {
-                    console.log(`status code: ${statusCode}, data: ${resData}`);
+                    return res.json();
                 } else {
-                    console.error(
-                        `status code: ${statusCode}, data: ${resData}`,
-                    );
+                    throw new Error(`delete comment fail`);
                 }
             })
-            .catch(err => console.error(err));
+            .then(data => console.log(data));
         res.status(200).json({
-            message: 'Data delete complete',
-            data: req.body,
+            message: 'delete comment success',
+            data: null,
         });
     } catch (error) {
-        res.status(500).json({ message: 'data delete Failed...' });
+        res.status(500).json({
+            message: 'delete comment failed...',
+            data: null,
+        });
     }
 };
