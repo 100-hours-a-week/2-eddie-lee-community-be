@@ -14,6 +14,7 @@ router.use('/users', userRouter);
 router.use('/posts', postRouter);
 router.use('/auth', authRouter);
 router.use('/data', dataRouter);
+//app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

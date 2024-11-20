@@ -1,5 +1,7 @@
 import express from 'express';
 import * as userController from '../controllers/userController.js';
+import * as userModel from '../models/userModel.js';
+import * as postModel from '../models/postModel.js';
 import { uploadProfileImg } from '../middleware/uploadMiddleware.js';
 
 const userRouter = express.Router();
@@ -9,18 +11,26 @@ userRouter.get('/data', userController.getUserData);
 
 //PATCH
 userRouter.patch(
-    '/:userId/user',
+    '/',
     uploadProfileImg.single('profileImg'),
     userController.modifyUser,
+    postModel.modifyUserData,
+    userModel.modifyUser,
 );
 userRouter.patch(
-    '/:userId/passwd',
+    '/passwd',
     uploadProfileImg.none(),
     userController.modifyUserPasswd,
+    userModel.modifyUserPasswd,
 );
 
 //DELETE
-userRouter.delete('/:userId/user', userController.deleteUser);
+userRouter.delete(
+    '/',
+    userController.deleteUser,
+    postModel.deleteUserWrites,
+    userModel.deleteUser,
+);
 userRouter.delete('/:userId/session', userController.deleteSession);
 
 export default userRouter;
