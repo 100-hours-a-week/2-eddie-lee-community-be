@@ -41,13 +41,9 @@ export const sendPosts = async (req, res) => {
         const getOffset = req.query.offset;
         let offset = parseInt(getOffset);
         const getPosts = getData('post');
-        console.log(`${getPosts[0]}`);
-        console.log(getPosts[0]);
         const result = [];
         for (let i = 0; i < 10; i++) {
             if (offset !== getPosts.length) {
-                console.log(offset);
-                console.log(`${getPosts[offset]}`);
                 result.push(getPosts[offset++]);
             } else {
                 break;
@@ -85,7 +81,7 @@ export const sendSpecificPostData = async (req, res) => {
 
 export const sendPostComments = async (req, res) => {
     try {
-        const postId = req.params.postId;
+        const postId = req.postId;
         const getCommentsData = getData('comment');
         const comments = getCommentsData.filter(
             comment => comment.post_id === postId,
@@ -100,8 +96,8 @@ export const sendPostComments = async (req, res) => {
 };
 
 export const sendComment = async (req, res) => {
-    const postId = req.params.postId;
-    const commentId = req.params.commentId;
+    const postId = req.commentInfo.postId;
+    const commentId = req.commentInfo.commentId;
     const comments = getData('comment');
     const comment = comments.find(
         comment => comment.comment_id == commentId && comment.post_id == postId,
@@ -151,7 +147,7 @@ export const addPost = async (req, res) => {
 export const addComment = async (req, res) => {
     try {
         const comments = getData('comment');
-        const newComment = req.body;
+        const newComment = req.commentInfo;
         comments.push(newComment);
         writeData('comment', comments);
         //댓글 개수 증가
@@ -204,7 +200,7 @@ export const updatePosts = async (req, res) => {
 
 export const updateComments = async (req, res) => {
     try {
-        const newCommentData = req.body;
+        const newCommentData = req.commentInfo;
         const getCommentData = getData('comment');
         const comments = getCommentData.map(comment =>
             comment.post_id === newCommentData.postId &&
@@ -250,7 +246,7 @@ export const updateView = async (req, res) => {
 
 export const updateLike = async (req, res) => {
     try {
-        const postId = req.params.postId;
+        const postId = req.postId;
         const getPostData = getData('post');
         const posts = getPostData.map(post =>
             post.post_id === postId ? { ...post, like: ++post.like } : post,
@@ -268,9 +264,10 @@ export const updateLike = async (req, res) => {
     }
 };
 
+//DELETE
 export const deletePost = async (req, res) => {
     try {
-        const postId = req.params.postId;
+        const postId = req.postId;
         const getCommentData = getData('comment');
         const comments = getCommentData.filter(
             comment => comment.post_id !== postId,
@@ -293,8 +290,8 @@ export const deletePost = async (req, res) => {
 
 export const deleteComment = async (req, res) => {
     try {
-        const postId = req.params.postId;
-        const commentId = req.params.commentId;
+        const postId = req.commentInfo.postId;
+        const commentId = req.commentInfo.commentId;
         const getCommentData = getData('comment');
         const comments = getCommentData.filter(
             comment =>

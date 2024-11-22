@@ -30,6 +30,10 @@ function writeUserData(data) {
 }
 
 //GET
+export const getUserSession = async (req, res, next) => {
+    console.log(req.session.user);
+    res.status(200).json(req.session.user);
+};
 
 //POST
 export const signup = async (req, res) => {

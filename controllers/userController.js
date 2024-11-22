@@ -3,8 +3,6 @@ import env from '../config/dotenv.js';
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
 
-export const getUserData = () => {};
-
 //PATCH
 export const modifyUser = async (req, res, next) => {
     try {
@@ -48,4 +46,14 @@ export const deleteUser = async (req, res, next) => {
         console.err(err.message);
     }
 };
-export const deleteSession = () => {};
+
+export const deleteSession = async (req, res, next) => {
+    if (req.session && req.session.user) {
+        req.session.destroy(err => {
+            if (err) {
+                return next(err);
+            }
+            res.clearCookie('connect.sid');
+        });
+    }
+};

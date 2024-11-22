@@ -1,11 +1,21 @@
 import env from '../config/dotenv.js';
-import fs from 'fs';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
 
 //POST
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
+    //세션의 존재 여부 미리 확인
+    if (req.session && req.session.user) {
+        return req.session.destroy(err => {
+            if (err) {
+                return next(err);
+            }
+            res.clearCookie('connect.sid');
+            console.log('Previous session cleared');
+        });
+    }
+
     const loginInfo = req.body;
     const email = loginInfo.email;
     const passwd = loginInfo.passwd;
@@ -23,7 +33,7 @@ export const login = async (req, res) => {
                 throw new Error(`auth user failed.. invalid response`);
             }
         });
-        if (!authUser) {
+        if (!authUser || !authUser.user_id) {
             console.log('login failed');
             res.status(401).json({
                 message: 'no user exist.',
@@ -43,8 +53,7 @@ export const login = async (req, res) => {
             });
         }
     } catch (err) {
-        console.error('Error fetching user data:', err.message);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(err);
     }
 };
 

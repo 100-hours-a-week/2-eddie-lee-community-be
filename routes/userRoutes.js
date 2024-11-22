@@ -7,7 +7,7 @@ import { uploadProfileImg } from '../middleware/uploadMiddleware.js';
 const userRouter = express.Router();
 
 //GET
-userRouter.get('/data', userController.getUserData);
+userRouter.get('/session', userModel.getUserSession);
 
 //PATCH
 userRouter.patch(
@@ -31,6 +31,6 @@ userRouter.delete(
     postModel.deleteUserWrites,
     userModel.deleteUser,
 );
-userRouter.delete('/:userId/session', userController.deleteSession);
+userRouter.delete('/session', userController.deleteSession);
 
 export default userRouter;

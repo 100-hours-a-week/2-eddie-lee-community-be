@@ -21,24 +21,21 @@ function formatTimestamp(timestamp) {
 }
 
 //GET
-export const resPostData = async (req, res) => {
+export const resPostData = async (req, res, next) => {
     const postId = req.params.postId;
     try {
         const getPostData = await fetch(`${baseUrl}/data/posts/${postId}`);
         const postData = await getPostData.json();
 
-        res.status(200).json(postData);
+        next();
     } catch (err) {
-        res.status(404).json({
-            message: 'Get post data failed..',
-            data: err.message,
-        });
+        next(err);
     }
 };
 
-export const getPostComments = async (req, res) => {
+export const getPostComments = async (req, res, next) => {
     try {
-        const postId = req.params.postId;
+        req.postId = req.params.postId;
         const getPostCommentsData = await fetch(
             `${baseUrl}/data/posts/${postId}/comments`,
         );
@@ -49,15 +46,14 @@ export const getPostComments = async (req, res) => {
     }
 };
 
-export const getCommentData = async (req, res) => {
+export const getCommentData = async (req, res, next) => {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
-    const response = await fetch(
-        `${baseUrl}/data/posts/${postId}/comments/${commentId}`,
-    ).catch(error => res.json({ result: 'error occurred' }));
-    const commentData = await response.json();
-
-    res.json(commentData);
+    req.commentInfo = {
+        postId: postId,
+        commentId: commentId,
+    };
+    next();
 };
 
 //POST
@@ -132,46 +128,23 @@ export const editPost = async (req, res) => {
     }
 };
 
-export const editComment = async (req, res) => {
+export const editComment = async (req, res, next) => {
     try {
-        const userId = req.body.userId;
         const comment = req.body.comment;
         const postId = req.params.postId;
-        const user = await fetch(`${baseUrl}/data/users/${userId}`)
-            .then(res => res.json())
-            .catch(error => console.error(`데이터 가져오기 에러${error}`));
-        const newComment = {
-            user_id: userId,
-            profile_img: user.profile_img,
-            nickname: user.nickname,
-            post_id: postId,
-            comment_id: Date.now().toString(),
-            timestamp: formatTimestamp(Date.now()),
+        const userData = req.session.user;
+        req.commentInfo = {
+            user_id: userData.userId,
+            profile_img: userData.profileImg,
+            nickname: userData.nickname,
             comment_content: comment,
+            postId: postId,
+            timestamp: formatTimestamp(Date.now()),
+            comment_id: Date.now().toString(),
         };
-        const result = await fetch(`${baseUrl}/data/comments`, {
-            method: 'POST',
-            body: JSON.stringify(newComment),
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error(`Add post err`);
-                }
-            })
-            .then(data => console.log(data));
-
-        res.status(200).json({
-            message: 'update comments success',
-            data: null,
-        });
+        next();
     } catch (error) {
-        res.status(404).json({
-            message: 'update comments failed..',
-            data: error.message,
-        });
+        next(error);
     }
 };
 
@@ -210,30 +183,18 @@ export const modifyPost = async (req, res) => {
     }
 };
 
-export const modifyComment = async (req, res) => {
+export const modifyComment = async (req, res, next) => {
     try {
         const postId = req.params.postId;
         const commentId = req.params.commentId;
-        const commentData = await fetch(`${baseUrl}/data/comments`, {
-            method: 'PATCH',
-            body: JSON.stringify({
-                postId: postId,
-                commentId: commentId,
-                comment_content: req.body.comment_content,
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        res.status(200).json({
-            message: 'Data modify complete',
-            data: null,
-        });
+        req.commentInfo = {
+            postId: postId,
+            commentId: commentId,
+            comment_content: req.body.comment_content,
+        };
+        next();
     } catch (error) {
-        res.status(500).json({
-            message: 'data modify Failed...',
-            data: error.message,
-        });
+        next(error);
     }
 };
 
@@ -263,85 +224,34 @@ export const updateView = async (req, res) => {
     }
 };
 
-export const updateLike = async (req, res) => {
-    const postId = req.params.postId;
+export const updateLike = async (req, res, next) => {
     try {
-        const updatePosts = await fetch(
-            `${baseUrl}/data/posts/${postId}/like`,
-            {
-                method: 'PATCH',
-            },
-        )
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error(`update view fail`);
-                }
-            })
-            .then(data => console.log(data));
-        res.status(200).json({
-            message: 'like increase success',
-            data: null,
-        });
+        req.postId = req.params.postId;
     } catch (err) {
-        res.status(404).json({
-            message: 'like increase failed..',
-            data: err.message,
-        });
+        next(err);
     }
 };
 
 //DELETE
-export const deletePost = async (req, res) => {
+export const deletePost = async (req, res, next) => {
     try {
         const postId = req.params.postId;
-        await fetch(`${baseUrl}/data/posts/${postId}`, {
-            method: 'DELETE',
-        })
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error(`delete post fail`);
-                }
-            })
-            .then(data => console.log(data));
-        res.status(200).json({
-            message: 'delete post success',
-            data: null,
-        });
-    } catch (error) {
-        res.status(404).json({
-            message: 'delete post failed',
-            data: error.message,
-        });
+        req.postId = postId;
+        next();
+    } catch (err) {
+        next(err);
     }
 };
 
-export const deleteComment = async (req, res) => {
+export const deleteComment = async (req, res, next) => {
     try {
         const postId = req.params.postId;
         const commentId = req.params.commentId;
-        await fetch(`${baseUrl}/data/posts/${postId}/comments/${commentId}`, {
-            method: 'DELETE',
-        })
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error(`delete comment fail`);
-                }
-            })
-            .then(data => console.log(data));
-        res.status(200).json({
-            message: 'delete comment success',
-            data: null,
-        });
+        req.commentInfo = {
+            postId: postId,
+            commentId: commentId,
+        };
     } catch (error) {
-        res.status(500).json({
-            message: 'delete comment failed...',
-            data: null,
-        });
+        next(error);
     }
 };
