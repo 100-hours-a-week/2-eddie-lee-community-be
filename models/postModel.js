@@ -173,7 +173,8 @@ export const addComment = async (req, res) => {
 //PATCH
 export const updatePosts = async (req, res) => {
     try {
-        const newPostData = req.body;
+        const newPostData = req.modifyPostData;
+        console.log(newPostData);
         const getPostData = getData('post');
         const posts = getPostData.map(post =>
             post.post_id === newPostData.postId
@@ -181,7 +182,7 @@ export const updatePosts = async (req, res) => {
                       ...post,
                       title: newPostData.title,
                       content: newPostData.content,
-                      image: newPostData.postImg,
+                      image: newPostData.image,
                   }
                 : post,
         );

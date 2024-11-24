@@ -37,6 +37,7 @@ postRouter.patch(
     '/:postId',
     uploadPostImg.single('inputImg'),
     postController.modifyPost,
+    postModel.updatePosts,
 );
 postRouter.patch(
     '/:postId/comments/:commentId',

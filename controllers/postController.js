@@ -1,5 +1,4 @@
 import env from '../config/dotenv.js';
-import fs from 'fs';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
@@ -156,37 +155,22 @@ export const editComment = async (req, res, next) => {
 };
 
 //PATCH
-export const modifyPost = async (req, res) => {
+export const modifyPost = async (req, res, next) => {
     try {
         const postId = req.params.postId;
         const reqPostData = req.body;
         const postImg = req.file
             ? `/public/images/postImages/${req.file.filename}`
             : '/public/assets/images/defaultPostImg.png';
-
-        const modifyPostData = {
+        req.modifyPostData = {
             postId: postId,
             title: reqPostData.title,
             content: reqPostData.content,
             image: postImg,
         };
-        const reqData = await fetch(`${baseUrl}/data/posts`, {
-            method: 'PATCH',
-            body: JSON.stringify(modifyPostData),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        res.status(200).json({
-            message: 'update post success',
-            data: null,
-        });
+        next();
     } catch (err) {
-        console.error(err);
-        res.status(404).json({
-            message: 'update post failed..',
-            data: err.message,
-        });
+        next(err);
     }
 };
 

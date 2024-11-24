@@ -1,11 +1,18 @@
 import multer from 'multer';
 import env from '../config/dotenv.js';
+import fs from 'fs';
 
 const rootDir = env.ROOT_DIR;
 
+// const ensureDir = dir => {
+//     if (!fs.existsSync(dir)) {
+//         fs.mkdirSync(dir, { recursive: true });
+//     }
+// };
+
 const profileImg = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, `${rootDir}/public/images/profileImages`);
+        cb(null, `/public/images/profileImages`);
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
@@ -14,7 +21,9 @@ const profileImg = multer.diskStorage({
 
 const postImg = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, `${rootDir}/public/images/postImages`);
+        const dir = `${rootDir}/public/images/postImages`;
+        //ensureDir(dir);
+        cb(null, dir);
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
@@ -30,10 +39,13 @@ const fileFilter = (req, file, cb) => {
 };
 
 const uploadProfileImg = multer({
-    profileImg,
+    storage: profileImg,
     fileFilter,
 });
 
-const uploadPostImg = multer({ postImg, fileFilter });
+const uploadPostImg = multer({
+    storage: postImg,
+    fileFilter,
+});
 
 export { uploadPostImg, uploadProfileImg };
