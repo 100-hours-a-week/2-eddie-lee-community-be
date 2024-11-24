@@ -31,8 +31,17 @@ function writeUserData(data) {
 
 //GET
 export const getUserSession = async (req, res, next) => {
-    console.log(req.session.user);
-    res.status(200).json(req.session.user);
+    //세션 오류로 인한 유저 정보 하드 코딩
+    // console.log(req.session.user);
+    // res.status(200).json(req.session.user);
+    const userData = {
+        user_id: '1731411547609',
+        profile_img: `/public/assets/images/profile_img.webp`,
+        email: 'eddie@test.io',
+        nickname: 'eddie.lee',
+    };
+
+    res.json(userData);
 };
 
 //POST

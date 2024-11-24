@@ -36,13 +36,13 @@ export const resPostData = async (req, res, next) => {
 export const getPostComments = async (req, res, next) => {
     try {
         req.postId = req.params.postId;
-        const getPostCommentsData = await fetch(
-            `${baseUrl}/data/posts/${postId}/comments`,
-        );
-        const postComments = await getPostCommentsData.json();
-        res.status(200).json(postComments);
-    } catch {
-        res.status(500).json({ message: 'internal_server_error', data: null });
+        // const getPostCommentsData = await fetch(
+        //     `${baseUrl}/data/posts/${postId}/comments`,
+        // );
+        // const postComments = await getPostCommentsData.json();
+        next();
+    } catch (err) {
+        next(err);
     }
 };
 
@@ -132,13 +132,20 @@ export const editComment = async (req, res, next) => {
     try {
         const comment = req.body.comment;
         const postId = req.params.postId;
-        const userData = req.session.user;
+        //const userData = req.session.user;
+        //세션 오류
+        const userData = {
+            user_id: '1731411547609',
+            profile_img: `/public/assets/images/profile_img.webp`,
+            email: 'eddie@test.io',
+            nickname: 'eddie.lee',
+        };
         req.commentInfo = {
-            user_id: userData.userId,
-            profile_img: userData.profileImg,
+            user_id: userData.user_id,
+            profile_img: userData.profile_img,
             nickname: userData.nickname,
             comment_content: comment,
-            postId: postId,
+            post_id: postId,
             timestamp: formatTimestamp(Date.now()),
             comment_id: Date.now().toString(),
         };
@@ -227,6 +234,7 @@ export const updateView = async (req, res) => {
 export const updateLike = async (req, res, next) => {
     try {
         req.postId = req.params.postId;
+        next();
     } catch (err) {
         next(err);
     }
@@ -251,6 +259,7 @@ export const deleteComment = async (req, res, next) => {
             postId: postId,
             commentId: commentId,
         };
+        next();
     } catch (error) {
         next(error);
     }

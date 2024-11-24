@@ -6,6 +6,7 @@ import postRouter from './routes/postRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import dataRouter from './routes/dataRoutes.js';
 import cors from 'cors';
+import path from 'path';
 
 dotenv.config();
 const port = 3000;
@@ -19,6 +20,10 @@ app.use(
     }),
 );
 app.options('*', cors());
+app.use(
+    '/public',
+    express.static(path.join(process.env.PROJECT_ROOT, 'public')),
+);
 app.use(router);
 router.use('/users', userRouter);
 router.use('/posts', postRouter);
