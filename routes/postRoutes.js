@@ -25,6 +25,7 @@ postRouter.post(
     '/edit',
     uploadPostImg.single('inputImg'),
     postController.editPost,
+    postModel.addPost,
 );
 postRouter.post(
     '/:postId/comment',

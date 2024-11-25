@@ -129,7 +129,7 @@ export const sendComments = async (req, res) => {
 export const addPost = async (req, res) => {
     try {
         const posts = getData('post');
-        const newPost = req.body;
+        const newPost = req.postData;
         posts.push(newPost);
         writeData('post', posts);
         res.status(201).json({

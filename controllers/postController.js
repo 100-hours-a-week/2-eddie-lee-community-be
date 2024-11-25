@@ -75,7 +75,7 @@ export const getPostList = async (req, res) => {
     }
 };
 
-export const editPost = async (req, res) => {
+export const editPost = async (req, res, next) => {
     try {
         const postData = req.body;
         const time = Date.now();
@@ -84,12 +84,15 @@ export const editPost = async (req, res) => {
             ? `/public/images/postImages/${req.file.filename}`
             : '/public/assets/images/defaultPostImg.png';
 
-        const getUserData = await fetch(
-            `${baseUrl}/data/users/${postData.userId}`,
-        );
-        const user = await getUserData.json();
+        //session 해결되면 바꿔야함
+        const user = {
+            user_id: '1731411547609',
+            profile_img: `/public/assets/images/profile_img.webp`,
+            email: 'eddie@test.io',
+            nickname: 'eddie.lee',
+        };
 
-        const postObj = {
+        req.postData = {
             user_id: postData.userId,
             post_id: Date.now().toString(),
             profile_img: user.profile_img,
@@ -102,28 +105,9 @@ export const editPost = async (req, res) => {
             view: 0,
             comment_count: 0,
         };
-        const result = await fetch(`${baseUrl}/data/posts`, {
-            method: 'POST',
-            body: JSON.stringify(postObj),
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error(`Add post err`);
-                }
-            })
-            .then(data => console.log(data));
-        res.status(200).json({
-            message: 'update posts success',
-            data: result,
-        });
+        next();
     } catch (error) {
-        res.status(500).json({
-            message: 'update posts failed..',
-            data: error.message,
-        });
+        next(error);
     }
 };
 
