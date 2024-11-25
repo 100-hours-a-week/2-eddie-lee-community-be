@@ -40,6 +40,7 @@ export const getUserSession = async (req, res, next) => {
         email: 'eddie@test.io',
         nickname: 'eddie.lee',
     };
+    console.log(req.session.user);
 
     res.json(userData);
 };

@@ -47,6 +47,7 @@ export const login = async (req, res, next) => {
                 userProfileImg: authUser.profile_img,
                 userEmail: authUser.email,
             };
+            console.log(`Create session: ${req.session.user}`);
             res.status(200).json({
                 message: 'Login success',
                 data: null,

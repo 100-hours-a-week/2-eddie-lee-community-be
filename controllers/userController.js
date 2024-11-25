@@ -34,13 +34,17 @@ export const modifyUser = async (req, res, next) => {
 export const modifyUserPasswd = async (req, res, next) => {
     try {
         const { modifyPasswd } = req.body;
+        // req.newPasswd = {
+        //     user_id: req.session.user.userId,
+        //     passwd: modifyPasswd,
+        // };
         req.newPasswd = {
-            user_id: req.session.user.userId,
+            user_id: '1731605529407',
             passwd: modifyPasswd,
         };
         next();
     } catch (err) {
-        console.error(err.message);
+        next(err);
     }
 };
 
