@@ -8,6 +8,7 @@ const dataRouter = express.Router();
 dataRouter.get('/posts', postModel.sendPosts);
 dataRouter.get('/posts/:postId', postModel.sendSpecificPostData);
 dataRouter.get('/comments', postModel.sendComments);
+dataRouter.get('/signup/', userModel.isDuplicate);
 
 //POST
 dataRouter.post('/posts', postModel.addPost);

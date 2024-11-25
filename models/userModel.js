@@ -32,17 +32,57 @@ function writeUserData(data) {
 //GET
 export const getUserSession = async (req, res, next) => {
     //세션 오류로 인한 유저 정보 하드 코딩
+    res.status(200).json(req.session.user);
+    // const userData = {
+    //     user_id: '1731411547609',
+    //     profile_img: `/public/assets/images/profile_img.webp`,
+    //     email: 'eddie@test.io',
+    //     nickname: 'eddie.lee',
+    // };
     // console.log(req.session.user);
-    // res.status(200).json(req.session.user);
-    const userData = {
-        user_id: '1731411547609',
-        profile_img: `/public/assets/images/profile_img.webp`,
-        email: 'eddie@test.io',
-        nickname: 'eddie.lee',
-    };
-    console.log(req.session.user);
 
-    res.json(userData);
+    // res.json(userData);
+};
+
+export const isDuplicate = async (req, res, next) => {
+    try {
+        const dataType = req.query.type;
+        const inputData = req.query.input;
+        if (!dataType || !inputData) {
+            throw new Error(`invalid data type`);
+        }
+
+        const userData = getUserData();
+        switch (dataType) {
+            case 'email':
+                if (userData.find(user => user.email === inputData)) {
+                    res.status(200).json({
+                        message: 'check duplicate success',
+                        data: true,
+                    });
+                    return;
+                }
+                break;
+            case 'nickname':
+                if (userData.find(user => user.nickname === inputData)) {
+                    res.status(200).json({
+                        message: 'check duplicate success',
+                        data: true,
+                    });
+                    return;
+                }
+                break;
+        }
+        res.status(200).json({
+            message: 'check duplicate success',
+            data: false,
+        });
+    } catch (err) {
+        res.status(404).json({
+            message: 'check duplicate fail',
+            data: err.message,
+        });
+    }
 };
 
 //POST

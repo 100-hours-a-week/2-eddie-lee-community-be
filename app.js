@@ -13,7 +13,7 @@ app.use(
         cookie: {
             httpOnly: true, // 클라이언트에서 쿠키 접근 방지
             secure: false, // HTTPS가 아니면 false
-            sameSite: 'none',
+            sameSite: 'lax',
             maxAge: 1000 * 60 * 60 * 24 * 30,
         },
     }),
