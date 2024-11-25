@@ -168,7 +168,7 @@ export const modifyUserPasswd = async (req, res, next) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        const userId = req.session.user.userId;
+        const userId = req.session.user.user_id;
         const getData = getUserData();
         const users = getData.filter(user => user.user_id !== userId);
         writeUserData(users);

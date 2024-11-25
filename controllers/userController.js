@@ -11,18 +11,11 @@ export const modifyUser = async (req, res, next) => {
             : `/public/assets/images/defaultPostImg.png`;
         const { nickname } = req.body;
 
-        // const sessionData = req.session.user;
-        // const userId = sessionData.userId;
-        // req.userData = {
-        //     user_id: userId,
-        //     profile_img: profileImg,
-        //     nickname: nickname,
-        // };
-        //session;
+        const sessionData = req.session.user;
+        const userId = sessionData.user_id;
         req.userData = {
-            user_id: '1731411547609',
+            user_id: userId,
             profile_img: profileImg,
-            email: 'eddie@test.io',
             nickname: nickname,
         };
         next();
@@ -34,12 +27,8 @@ export const modifyUser = async (req, res, next) => {
 export const modifyUserPasswd = async (req, res, next) => {
     try {
         const { modifyPasswd } = req.body;
-        // req.newPasswd = {
-        //     user_id: req.session.user.userId,
-        //     passwd: modifyPasswd,
-        // };
         req.newPasswd = {
-            user_id: '1731605529407',
+            user_id: req.session.user.user_id,
             passwd: modifyPasswd,
         };
         next();
@@ -51,7 +40,7 @@ export const modifyUserPasswd = async (req, res, next) => {
 //DELETE
 export const deleteUser = async (req, res, next) => {
     try {
-        req.userData = { userId: req.session.user.userId };
+        req.userData = { userId: req.session.user.user_id };
         next();
     } catch (err) {
         console.err(err.message);

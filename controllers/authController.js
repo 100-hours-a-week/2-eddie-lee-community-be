@@ -42,10 +42,10 @@ export const login = async (req, res, next) => {
         } else {
             console.log('login success');
             req.session.user = {
-                userId: authUser.user_id,
-                userNickname: authUser.nickname,
-                userProfileImg: authUser.profile_img,
-                userEmail: authUser.email,
+                user_id: authUser.user_id,
+                nickname: authUser.nickname,
+                profile_img: authUser.profile_img,
+                email: authUser.email,
             };
             res.status(200).json({
                 message: 'Login success',

@@ -80,17 +80,10 @@ export const editPost = async (req, res, next) => {
         const postData = req.body;
         const time = Date.now();
         const timestamp = formatTimestamp(time);
+        const user = req.session.user;
         const fileData = req.file
             ? `/public/images/postImages/${req.file.filename}`
             : '/public/assets/images/defaultPostImg.png';
-
-        //session 해결되면 바꿔야함
-        const user = {
-            user_id: '1731411547609',
-            profile_img: `/public/assets/images/profile_img.webp`,
-            email: 'eddie@test.io',
-            nickname: 'eddie.lee',
-        };
 
         req.postData = {
             user_id: postData.userId,
@@ -115,14 +108,7 @@ export const editComment = async (req, res, next) => {
     try {
         const comment = req.body.comment;
         const postId = req.params.postId;
-        //const userData = req.session.user;
-        //세션 오류
-        const userData = {
-            user_id: '1731411547609',
-            profile_img: `/public/assets/images/profile_img.webp`,
-            email: 'eddie@test.io',
-            nickname: 'eddie.lee',
-        };
+        const userData = req.session.user;
         req.commentInfo = {
             user_id: userData.user_id,
             profile_img: userData.profile_img,
