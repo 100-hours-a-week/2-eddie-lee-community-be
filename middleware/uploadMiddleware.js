@@ -12,7 +12,7 @@ const rootDir = env.ROOT_DIR;
 
 const profileImg = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, `/public/images/profileImages`);
+        cb(null, `${rootDir}/public/images/profileImages`);
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);

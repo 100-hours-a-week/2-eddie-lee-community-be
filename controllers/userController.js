@@ -7,21 +7,28 @@ const rootDir = env.ROOT_DIR;
 export const modifyUser = async (req, res, next) => {
     try {
         const profileImg = req.file
-            ? `${rootDir}/public/assets/images/defaultPostImg.png`
-            : `${rootDir}/public/images/profileImages/${req.file.filename}`;
+            ? `/public/images/profileImages/${req.file.filename}`
+            : `/public/assets/images/defaultPostImg.png`;
         const { nickname } = req.body;
-        //const userId = req.params.userId;
-        const sessionData = req.session.user;
-        const userId = sessionData.userId;
+
+        // const sessionData = req.session.user;
+        // const userId = sessionData.userId;
+        // req.userData = {
+        //     user_id: userId,
+        //     profile_img: profileImg,
+        //     nickname: nickname,
+        // };
+        //session;
         req.userData = {
-            user_id: userId,
+            user_id: '1731411547609',
             profile_img: profileImg,
+            email: 'eddie@test.io',
             nickname: nickname,
         };
+        next();
     } catch (err) {
-        console.error(err.message);
+        next(err);
     }
-    next();
 };
 
 export const modifyUserPasswd = async (req, res, next) => {
