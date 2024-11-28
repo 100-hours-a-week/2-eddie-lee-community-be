@@ -9,7 +9,7 @@ import cors from 'cors';
 import path from 'path';
 
 dotenv.config();
-const port = 3000;
+const port = process.env.PORT;
 const router = express.Router();
 app.use(
     cors({
@@ -29,8 +29,6 @@ router.use('/users', userRouter);
 router.use('/posts', postRouter);
 router.use('/auth', authRouter);
 router.use('/data', dataRouter);
-
-//app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

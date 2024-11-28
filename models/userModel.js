@@ -33,15 +33,6 @@ function writeUserData(data) {
 export const getUserSession = async (req, res, next) => {
     //세션 오류로 인한 유저 정보 하드 코딩
     res.status(200).json(req.session.user);
-    // const userData = {
-    //     user_id: '1731411547609',
-    //     profile_img: `/public/assets/images/profile_img.webp`,
-    //     email: 'eddie@test.io',
-    //     nickname: 'eddie.lee',
-    // };
-    // console.log(req.session.user);
-
-    // res.json(userData);
 };
 
 export const isDuplicate = async (req, res, next) => {
