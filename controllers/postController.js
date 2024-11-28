@@ -1,32 +1,17 @@
 import env from '../config/dotenv.js';
+import * as postDAO from '../DAO/postDAO.js';
+import * as commentDAO from '../DAO/commentDAO.js';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
 const postFilePath = `${baseUrl}/data/posts`;
 
-//timestamp
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const day = String(date.getDate()).padStart(2, '0');
-
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
 //GET
 export const resPostData = async (req, res, next) => {
     const postId = req.params.postId;
     try {
-        const getPostData = await fetch(`${baseUrl}/data/posts/${postId}`);
-        const postData = await getPostData.json();
-
-        next();
+        const postData = await postDAO.readSelectedPost(postId);
+        res.status(200).json(postData);
     } catch (err) {
         next(err);
     }
@@ -34,39 +19,41 @@ export const resPostData = async (req, res, next) => {
 
 export const getPostComments = async (req, res, next) => {
     try {
-        req.postId = req.params.postId;
-        // const getPostCommentsData = await fetch(
-        //     `${baseUrl}/data/posts/${postId}/comments`,
-        // );
-        // const postComments = await getPostCommentsData.json();
-        next();
+        const postId = req.params.postId;
+        const result = await commentDAO.getComments(postId);
+        if (!result) {
+            throw new Error('get comment failed');
+        }
+        res.status(200).json(result);
     } catch (err) {
         next(err);
     }
 };
 
 export const getCommentData = async (req, res, next) => {
-    const postId = req.params.postId;
-    const commentId = req.params.commentId;
-    req.commentInfo = {
-        postId: postId,
-        commentId: commentId,
-    };
-    next();
+    try {
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        const commentData = await commentDAO.readComment(postId, commentId);
+        if (!commentData) {
+            throw new Error('comment data does not exist');
+        }
+        res.status(200).json(commentData);
+    } catch (err) {
+        res.status(404).json({
+            message: 'get comment data failed',
+            data: err.message,
+        });
+    }
 };
 
 //POST
 export const getPostList = async (req, res) => {
     try {
         const offset = req.body.offset;
-        let postArr = [];
-        const getPostData = await fetch(
-            `${baseUrl}/data/posts?offset=${offset}`,
-        );
-        const getResult = await getPostData.json();
-        const getOffset = getResult.offset;
-        const postList = getResult.data;
-        res.status(201).json({ offset: getOffset, data: postList });
+        const getPostData = await postDAO.readPosts(offset);
+        const getOffset = offset + getPostData.length;
+        res.status(201).json({ offset: getOffset, data: getPostData });
     } catch (err) {
         res.status(404).json({
             message: 'Get post list Failed...',
@@ -77,28 +64,22 @@ export const getPostList = async (req, res) => {
 
 export const editPost = async (req, res, next) => {
     try {
-        const postData = req.body;
-        const time = Date.now();
-        const timestamp = formatTimestamp(time);
+        const getPostData = req.body;
         const user = req.session.user;
         const fileData = req.file
             ? `/public/images/postImages/${req.file.filename}`
-            : '/public/assets/images/defaultPostImg.png';
+            : null;
 
-        req.postData = {
-            user_id: postData.userId,
-            post_id: Date.now().toString(),
-            profile_img: user.profile_img,
-            nickname: user.nickname,
-            title: postData.title,
-            content: postData.content,
+        const postData = {
+            user_id: user.user_id,
+            title: getPostData.title,
+            content: getPostData.content,
             image: fileData,
-            timestamp: timestamp,
-            like: 0,
-            view: 0,
-            comment_count: 0,
         };
-        next();
+        if (!(await postDAO.addPost(postData))) {
+            throw new Error('edit post failed..');
+        }
+        res.status(201).json({ message: 'edit post success', data: null });
     } catch (error) {
         next(error);
     }
@@ -109,16 +90,16 @@ export const editComment = async (req, res, next) => {
         const comment = req.body.comment;
         const postId = req.params.postId;
         const userData = req.session.user;
-        req.commentInfo = {
+        const commentData = {
             user_id: userData.user_id,
-            profile_img: userData.profile_img,
-            nickname: userData.nickname,
             comment_content: comment,
             post_id: postId,
-            timestamp: formatTimestamp(Date.now()),
-            comment_id: Date.now().toString(),
         };
-        next();
+
+        if (!(await commentDAO.addComment(commentData))) {
+            throw new Error('edit comment fail');
+        }
+        res.status(201).json({ message: 'edit comment success', data: null });
     } catch (error) {
         next(error);
     }
@@ -131,14 +112,17 @@ export const modifyPost = async (req, res, next) => {
         const reqPostData = req.body;
         const postImg = req.file
             ? `/public/images/postImages/${req.file.filename}`
-            : '/public/assets/images/defaultPostImg.png';
-        req.modifyPostData = {
+            : null;
+        const postData = {
             postId: postId,
             title: reqPostData.title,
             content: reqPostData.content,
             image: postImg,
         };
-        next();
+        if (!(await postDAO.updatePost(postData))) {
+            throw new Error('update post failed');
+        }
+        res.status(200).json({ message: 'update post success', data: null });
     } catch (err) {
         next(err);
     }
@@ -148,12 +132,19 @@ export const modifyComment = async (req, res, next) => {
     try {
         const postId = req.params.postId;
         const commentId = req.params.commentId;
-        req.commentInfo = {
+        const commentData = {
             postId: postId,
             commentId: commentId,
-            comment_content: req.body.comment_content,
+            content: req.body.content,
         };
-        next();
+        (await commentDAO.updateComment(commentData))
+            ? res
+                  .status(200)
+                  .json({ message: 'modify comment success', data: null })
+            : res.status(404).json({
+                  message: 'modify comment fail',
+                  data: null,
+              });
     } catch (error) {
         next(error);
     }
@@ -162,21 +153,11 @@ export const modifyComment = async (req, res, next) => {
 export const updateView = async (req, res) => {
     const postId = req.params.postId;
     try {
-        const updatePosts = await fetch(
-            `${baseUrl}/data/posts/${postId}/view`,
-            {
-                method: 'PATCH',
-            },
-        )
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error(`update view fail`);
-                }
-            })
-            .then(data => console.log(data));
-        res.status(200).json({ message: 'Update view complete', data: null });
+        (await postDAO.updatePostView(postId))
+            ? res
+                  .status(200)
+                  .json({ message: 'Update view complete', data: null })
+            : res.status(404).json({ message: 'update view fail', data: null });
     } catch (err) {
         res.status(404).json({
             message: 'Update view failed..',
@@ -186,9 +167,13 @@ export const updateView = async (req, res) => {
 };
 
 export const updateLike = async (req, res, next) => {
+    const postId = req.params.postId;
     try {
-        req.postId = req.params.postId;
-        next();
+        (await postDAO.updatePostLike(postId))
+            ? res
+                  .status(200)
+                  .json({ message: 'Update like complete', data: null })
+            : res.status(404).json({ message: 'update like fail', data: null });
     } catch (err) {
         next(err);
     }
@@ -198,8 +183,9 @@ export const updateLike = async (req, res, next) => {
 export const deletePost = async (req, res, next) => {
     try {
         const postId = req.params.postId;
-        req.postId = postId;
-        next();
+        (await postDAO.deletePost(postId))
+            ? res.json({ message: 'delete post success', data: null })
+            : res.status(404).json({ message: 'delete post fail', data: null });
     } catch (err) {
         next(err);
     }
@@ -209,11 +195,15 @@ export const deleteComment = async (req, res, next) => {
     try {
         const postId = req.params.postId;
         const commentId = req.params.commentId;
-        req.commentInfo = {
+        const commentInfo = {
             postId: postId,
             commentId: commentId,
         };
-        next();
+        (await commentDAO.deleteComment(commentInfo))
+            ? res.json({ message: 'delete comment success', data: null })
+            : res
+                  .status(404)
+                  .json({ message: 'delete comment fail', data: null });
     } catch (error) {
         next(error);
     }

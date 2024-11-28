@@ -33,10 +33,9 @@ export const login = async (req, res, next) => {
             req.session.user = {
                 user_id: authUser.id,
                 nickname: authUser.nickname,
-                profile_img: authUser.profileImg,
+                profileImg: authUser.profileImg,
                 email: authUser.email,
             };
-            console.log(req.session.user);
             res.status(200).json({
                 message: 'Login success',
                 data: null,
@@ -47,7 +46,7 @@ export const login = async (req, res, next) => {
     }
 };
 
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
     try {
         const textData = req.body;
         const fileData = req.file
@@ -70,9 +69,6 @@ export const signup = async (req, res) => {
             throw new Error(`signup failed..`);
         }
     } catch (err) {
-        res.status(404).json({
-            message: 'signup fail',
-            data: err.message,
-        });
+        next(err);
     }
 };

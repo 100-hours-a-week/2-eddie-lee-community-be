@@ -7,57 +7,31 @@ const postRouter = express.Router();
 
 //GET
 postRouter.get('/:postId/data', postController.resPostData);
-postRouter.get(
-    '/:postId/comments',
-    postController.getPostComments,
-    postModel.sendPostComments,
-);
-postRouter.get(
-    '/:postId/comments/:commentId',
-    postController.getCommentData,
-    postModel.sendComment,
-);
+postRouter.get('/:postId/comments', postController.getPostComments);
+postRouter.get('/:postId/comments/:commentId', postController.getCommentData);
 
 //POST
 
-postRouter.post('/', postController.getPostList, postModel.sendPosts);
+postRouter.post('/', postController.getPostList);
 postRouter.post(
     '/edit',
     uploadPostImg.single('inputImg'),
     postController.editPost,
-    postModel.addPost,
 );
-postRouter.post(
-    '/:postId/comment',
-    postController.editComment,
-    postModel.addComment,
-);
+postRouter.post('/:postId/comment', postController.editComment);
 
 //PATCH
 postRouter.patch(
     '/:postId',
     uploadPostImg.single('inputImg'),
     postController.modifyPost,
-    postModel.updatePosts,
 );
-postRouter.patch(
-    '/:postId/comments/:commentId',
-    postController.modifyComment,
-    postModel.updateComments,
-);
+postRouter.patch('/:postId/comments/:commentId', postController.modifyComment);
 postRouter.patch('/:postId/view', postController.updateView);
-postRouter.patch(
-    '/:postId/like',
-    postController.updateLike,
-    postModel.updateLike,
-);
+postRouter.patch('/:postId/like', postController.updateLike);
 
 //DELETE
-postRouter.delete('/:postId', postController.deletePost, postModel.deletePost);
-postRouter.delete(
-    '/:postId/comments/:commentId',
-    postController.deleteComment,
-    postModel.deleteComment,
-);
+postRouter.delete('/:postId', postController.deletePost);
+postRouter.delete('/:postId/comments/:commentId', postController.deleteComment);
 
 export default postRouter;
