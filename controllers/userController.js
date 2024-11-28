@@ -5,6 +5,10 @@ const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
 
 //PATCH
+export const getUserSession = async (req, res, next) => {
+    res.status(200).json(req.session.user);
+};
+
 export const modifyUser = async (req, res, next) => {
     try {
         const profileImg = req.file

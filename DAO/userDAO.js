@@ -49,3 +49,9 @@ export const updatePasswd = async userData => {
     ]);
     return result ? true : false;
 };
+
+export const findDuplicate = async (dataType, data) => {
+    const setQuery = 'SELECT ? FROM USERS WHERE ? = ?';
+    const result = await runQuery(setQuery, [dataType, dataType, data]);
+    return result ? true : false;
+};

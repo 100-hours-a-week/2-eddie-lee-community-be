@@ -4,6 +4,9 @@ import { uploadProfileImg } from '../middleware/uploadMiddleware.js';
 
 const authRouter = express.Router();
 
+//GET
+authRouter.get('/duplicate', authController.isDuplicate);
+
 //POST
 authRouter.post('/login', uploadProfileImg.none(), authController.login);
 authRouter.post(

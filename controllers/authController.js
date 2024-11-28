@@ -3,6 +3,32 @@ import * as userDAO from '../DAO/userDAO.js';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
+//GET
+export const isDuplicate = async (req, res, next) => {
+    try {
+        const { type, input } = req.query;
+        if (!type || !input) {
+            throw new Error(`invalid data type`);
+        }
+        const result = await userDAO.findDuplicate(type, input);
+        if (result) {
+            res.status(200).json({
+                message: 'check duplicate success',
+                data: true,
+            });
+        } else {
+            res.status(200).json({
+                message: 'check duplicate success',
+                data: false,
+            });
+        }
+    } catch (err) {
+        res.status(404).json({
+            message: 'check duplicate fail',
+            data: err.message,
+        });
+    }
+};
 
 //POST
 export const login = async (req, res, next) => {
