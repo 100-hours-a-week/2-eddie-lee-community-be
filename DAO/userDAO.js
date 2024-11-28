@@ -29,3 +29,23 @@ export const addUser = async userData => {
     ]);
     return result ? true : false;
 };
+
+export const updateUser = async userData => {
+    const setQuery =
+        'UPDATE USERS SET profile_img = ?, nickname = ? WHERE id = ?';
+    const result = await runQuery(setQuery, [
+        userData.profile_img,
+        userData.nickname,
+        userData.user_id,
+    ]);
+    return result ? true : false;
+};
+
+export const updatePasswd = async userData => {
+    const setQuery = 'UPDATE USERS SET passwd = ? WHERE id = ?';
+    const result = await runQuery(setQuery, [
+        userData.passwd,
+        userData.user_id,
+    ]);
+    return result ? true : false;
+};

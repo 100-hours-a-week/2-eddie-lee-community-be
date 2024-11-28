@@ -113,30 +113,6 @@ export const sendUser = async (req, res) => {
     }
 };
 
-export const modifyUser = async (req, res) => {
-    try {
-        const userId = req.userData.user_id;
-        const profileImg = req.userData.profile_img;
-        const nickname = req.userData.nickname;
-        const getData = getUserData();
-        const users = getData.map(user =>
-            user.user_id === userId
-                ? { ...user, profile_img: profileImg, nickname: nickname }
-                : user,
-        );
-        writeUserData(users);
-        res.status(200).json({
-            message: 'modify_user_info_success',
-            data: null,
-        });
-    } catch (err) {
-        res.status(404).json({
-            message: 'modify_user_info_success',
-            data: err.message,
-        });
-    }
-};
-
 export const modifyUserPasswd = async (req, res, next) => {
     try {
         const userId = req.newPasswd.user_id;

@@ -1,4 +1,5 @@
 import env from '../config/dotenv.js';
+import * as userDAO from '../DAO/userDAO.js';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
@@ -8,17 +9,19 @@ export const modifyUser = async (req, res, next) => {
     try {
         const profileImg = req.file
             ? `/public/images/profileImages/${req.file.filename}`
-            : `/public/assets/images/defaultPostImg.png`;
+            : null;
         const { nickname } = req.body;
 
         const sessionData = req.session.user;
         const userId = sessionData.user_id;
-        req.userData = {
+        const userData = {
             user_id: userId,
             profile_img: profileImg,
             nickname: nickname,
         };
-        next();
+        (await userDAO.updateUser(userData))
+            ? res.json({ message: 'modify user success', data: 'null' })
+            : res.status(404).json({ message: 'modify user fail', data: null });
     } catch (err) {
         next(err);
     }
@@ -27,11 +30,15 @@ export const modifyUser = async (req, res, next) => {
 export const modifyUserPasswd = async (req, res, next) => {
     try {
         const { modifyPasswd } = req.body;
-        req.newPasswd = {
+        const userData = {
             user_id: req.session.user.user_id,
             passwd: modifyPasswd,
         };
-        next();
+        (await userDAO.updatePasswd(userData))
+            ? res.json({ message: 'modify passwd success', data: null })
+            : res
+                  .status(404)
+                  .json({ message: 'modify passwd fail', data: null });
     } catch (err) {
         next(err);
     }

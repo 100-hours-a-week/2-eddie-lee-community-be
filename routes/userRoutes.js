@@ -14,8 +14,6 @@ userRouter.patch(
     '/',
     uploadProfileImg.single('profileImg'),
     userController.modifyUser,
-    postModel.modifyUserData,
-    userModel.modifyUser,
 );
 userRouter.patch(
     '/passwd',
@@ -25,12 +23,7 @@ userRouter.patch(
 );
 
 //DELETE
-userRouter.delete(
-    '/',
-    userController.deleteUser,
-    postModel.deleteUserWrites,
-    userModel.deleteUser,
-);
+userRouter.delete('/', userController.deleteUser, userModel.deleteUser);
 userRouter.delete('/session', userController.deleteSession);
 
 export default userRouter;
