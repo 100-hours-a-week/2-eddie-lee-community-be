@@ -4,11 +4,16 @@ import * as userDAO from '../DAO/userDAO.js';
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
 
-//PATCH
+//GET
 export const getUserSession = async (req, res, next) => {
-    res.status(200).json(req.session.user);
+    if (req.session.user) {
+        res.status(200).json(req.session.user);
+    } else {
+        res.status(404).json({ message: 'session not exist' });
+    }
 };
 
+//PATCH
 export const modifyUser = async (req, res, next) => {
     try {
         const profileImg = req.file
@@ -51,10 +56,11 @@ export const modifyUserPasswd = async (req, res, next) => {
 //DELETE
 export const deleteUser = async (req, res, next) => {
     try {
-        req.userData = { userId: req.session.user.user_id };
-        next();
+        const userId = req.session.user.user_id;
+        await userDAO.deleteUser(userId);
+        res.json({ message: 'delete user success', data: null });
     } catch (err) {
-        console.err(err.message);
+        console.error(err.message);
     }
 };
 
@@ -64,7 +70,8 @@ export const deleteSession = async (req, res, next) => {
             if (err) {
                 return next(err);
             }
-            res.clearCookie('connect.sid');
+            console.log('Previous session cleared');
         });
     }
+    res.clearCookie('connect.sid');
 };

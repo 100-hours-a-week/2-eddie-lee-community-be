@@ -32,17 +32,6 @@ export const isDuplicate = async (req, res, next) => {
 
 //POST
 export const login = async (req, res, next) => {
-    //세션의 존재 여부 미리 확인
-    if (req.session && req.session.user) {
-        return req.session.destroy(err => {
-            if (err) {
-                return next(err);
-            }
-            res.clearCookie('connect.sid');
-            console.log('Previous session cleared');
-        });
-    }
-
     const loginInfo = req.body;
     const email = loginInfo.email;
     const passwd = loginInfo.passwd;
@@ -76,7 +65,7 @@ export const signup = async (req, res, next) => {
     try {
         const textData = req.body;
         const fileData = req.file
-            ? `/public/userPhotos/${req.file.filename}`
+            ? `/public/images/profileImages/${req.file.filename}`
             : null;
 
         const addUserData = {

@@ -11,7 +11,7 @@ authRouter.get('/duplicate', authController.isDuplicate);
 authRouter.post('/login', uploadProfileImg.none(), authController.login);
 authRouter.post(
     '/signup',
-    uploadProfileImg.single('profilePhoto'),
+    uploadProfileImg.single('profileImg'),
     authController.signup,
 );
 

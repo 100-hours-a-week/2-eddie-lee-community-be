@@ -68,11 +68,8 @@ export const updateComment = async commentData => {
 };
 
 export const deleteComment = async commentInfo => {
-    const setQuery = 'DELETE FROM COMMENTS WHERE id = ? && post_id = ?';
-    const result = await runQuery(setQuery, [
-        commentInfo.commentId,
-        commentInfo.postId,
-    ]);
+    const setQuery = 'DELETE FROM COMMENTS WHERE id = ?';
+    const result = await runQuery(setQuery, [commentInfo.commentId]);
     if (!result) {
         throw new Error('delete post fail');
     }

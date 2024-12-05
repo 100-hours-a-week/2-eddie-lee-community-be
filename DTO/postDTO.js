@@ -3,18 +3,18 @@ class PostListDTO {
         id,
         title,
         timestamp,
-        like,
-        comment_count,
-        view,
+        likes,
+        comment_counts,
+        views,
         profileImg,
         nickname,
     ) {
         this.id = id;
         this.title = title;
         this.timestamp = timestamp;
-        this.like = like;
-        this.comment_count = comment_count;
-        this.view = view;
+        this.likes = likes;
+        this.comment_counts = comment_counts;
+        this.views = views;
         this.profileImg = profileImg;
         this.nickname = nickname;
     }

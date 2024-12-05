@@ -50,10 +50,9 @@ export const getCommentData = async (req, res, next) => {
 //POST
 export const getPostList = async (req, res) => {
     try {
-        const offset = req.body.offset;
-        const getPostData = await postDAO.readPosts(offset);
-        const getOffset = offset + getPostData.length;
-        res.status(201).json({ offset: getOffset, data: getPostData });
+        const { page } = req.query;
+        const getPostData = await postDAO.readPosts(page);
+        res.status(200).json(getPostData);
     } catch (err) {
         res.status(404).json({
             message: 'Get post list Failed...',
@@ -87,7 +86,7 @@ export const editPost = async (req, res, next) => {
 
 export const editComment = async (req, res, next) => {
     try {
-        const comment = req.body.comment;
+        const comment = req.body.content;
         const postId = req.params.postId;
         const userData = req.session.user;
         const commentData = {
@@ -193,10 +192,8 @@ export const deletePost = async (req, res, next) => {
 
 export const deleteComment = async (req, res, next) => {
     try {
-        const postId = req.params.postId;
         const commentId = req.params.commentId;
         const commentInfo = {
-            postId: postId,
             commentId: commentId,
         };
         (await commentDAO.deleteComment(commentInfo))

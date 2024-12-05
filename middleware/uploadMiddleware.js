@@ -1,14 +1,7 @@
 import multer from 'multer';
 import env from '../config/dotenv.js';
-import fs from 'fs';
 
 const rootDir = env.ROOT_DIR;
-
-// const ensureDir = dir => {
-//     if (!fs.existsSync(dir)) {
-//         fs.mkdirSync(dir, { recursive: true });
-//     }
-// };
 
 const profileImg = multer.diskStorage({
     destination: (req, file, cb) => {

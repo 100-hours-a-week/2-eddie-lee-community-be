@@ -6,12 +6,11 @@ const postRouter = express.Router();
 
 //GET
 postRouter.get('/:postId/data', postController.resPostData);
+postRouter.get('/', postController.getPostList);
 postRouter.get('/:postId/comments', postController.getPostComments);
 postRouter.get('/:postId/comments/:commentId', postController.getCommentData);
 
 //POST
-
-postRouter.post('/', postController.getPostList);
 postRouter.post(
     '/edit',
     uploadPostImg.single('inputImg'),
@@ -31,6 +30,6 @@ postRouter.patch('/:postId/like', postController.updateLike);
 
 //DELETE
 postRouter.delete('/:postId', postController.deletePost);
-postRouter.delete('/:postId/comments/:commentId', postController.deleteComment);
+postRouter.delete('/comments/:commentId', postController.deleteComment);
 
 export default postRouter;

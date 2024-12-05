@@ -51,7 +51,16 @@ export const updatePasswd = async userData => {
 };
 
 export const findDuplicate = async (dataType, data) => {
-    const setQuery = 'SELECT ? FROM USERS WHERE ? = ?';
-    const result = await runQuery(setQuery, [dataType, dataType, data]);
-    return result ? true : false;
+    const setQuery = `SELECT ${dataType} FROM USERS WHERE ${dataType} = \'${data}\'`;
+    const result = await runQuery(setQuery, []);
+    return result.length ? true : false;
+};
+
+export const deleteUser = async userId => {
+    const setQuery = `DELETE FROM USERS WHERE id = ?`;
+    try {
+        await runQuery(setQuery, [userId]);
+    } catch (err) {
+        console.error(err.message);
+    }
 };

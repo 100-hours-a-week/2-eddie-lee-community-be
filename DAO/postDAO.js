@@ -16,7 +16,7 @@ export const readSelectedPost = async postId => {
         throw new Error('update comment count fail');
     }
     const setQuery =
-        'SELECT USERS.id, title, USERS.profile_img, USERS.nickname, timestamp, image, content, post_like, post_view, comment_count FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id = ?';
+        'SELECT USERS.id as id, title, USERS.profile_img, USERS.nickname, timestamp, image, content, post_like, post_view, comment_count FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id = ?';
     const result = await runQuery(setQuery, [postId]);
     if (result) {
         const post = new PostDTO(
@@ -37,10 +37,10 @@ export const readSelectedPost = async postId => {
     }
 };
 
-export const readPosts = async offset => {
+export const readPosts = async page => {
     const setQuery =
-        'SELECT POSTS.id, title, timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id BETWEEN ? AND ?';
-    const result = await runQuery(setQuery, [offset, offset + 10]);
+        'SELECT POSTS.id, title, timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id LIMIT ? OFFSET ?';
+    const result = await runQuery(setQuery, [5, page * 5]);
     if (result) {
         const posts = [];
         result.forEach(post => {
