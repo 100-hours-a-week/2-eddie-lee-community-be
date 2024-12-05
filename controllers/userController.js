@@ -82,5 +82,5 @@ export const deleteSession = async (req, res, next) => {
         });
     }
     res.clearCookie('connect.sid');
-    res.status(200).send('Session cleared');
+    res.status(200).json({ message: 'Session cleared' });
 };
