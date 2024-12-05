@@ -1,5 +1,6 @@
 import env from '../config/dotenv.js';
 import * as userDAO from '../DAO/userDAO.js';
+import fs from 'fs';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
@@ -57,7 +58,14 @@ export const modifyUserPasswd = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const userId = req.session.user.user_id;
-        await userDAO.deleteUser(userId);
+        userDAO.deleteUser(userId);
+        fs.unlink(req.session.user.profileImg, err => {
+            if (err) {
+                console.error('Failed to delete file', err.message);
+            } else {
+                console.log('Profile image delete success.');
+            }
+        });
         res.json({ message: 'delete user success', data: null });
     } catch (err) {
         console.error(err.message);
@@ -74,4 +82,5 @@ export const deleteSession = async (req, res, next) => {
         });
     }
     res.clearCookie('connect.sid');
+    res.status(200).send('Session cleared');
 };

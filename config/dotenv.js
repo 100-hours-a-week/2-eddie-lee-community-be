@@ -19,6 +19,7 @@ const env = {
     DB_PASS: process.env.DB_PASS,
     DB_PORT: process.env.DB_PORT,
     DATABASE: process.env.DATABASE,
+    CORS_URL: process.env.CORS_URL,
 };
 
 export default env;
