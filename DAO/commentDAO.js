@@ -17,7 +17,7 @@ export const addComment = async commentData => {
 
 export const getComments = async postId => {
     const setQuery =
-        'SELECT COMMENTS.id, content, timestamp, USERS.profile_img, USERS.nickname, user_id FROM COMMENTS LEFT JOIN USERS ON COMMENTS.user_id = USERS.id WHERE post_id = ?';
+        "SELECT COMMENTS.id, content, DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') as timestamp, USERS.profile_img, USERS.nickname, user_id FROM COMMENTS LEFT JOIN USERS ON COMMENTS.user_id = USERS.id WHERE post_id = ?";
     const result = await runQuery(setQuery, [postId]);
     if (!result) {
         throw new Error('get comment failed');
