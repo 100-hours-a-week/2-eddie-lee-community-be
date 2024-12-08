@@ -16,7 +16,7 @@ export const readSelectedPost = async postId => {
         throw new Error('update comment count fail');
     }
     const setQuery =
-        "SELECT USERS.id as id, title, USERS.profile_img, USERS.nickname, DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') as timestamp, image, content, post_like, post_view, comment_count FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id = ?";
+        "SELECT USERS.id as id, title, USERS.profile_img, USERS.nickname, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, image, content, post_like, post_view, comment_count FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id = ?";
     const result = await runQuery(setQuery, [postId]);
     if (result) {
         const post = new PostDTO(
@@ -39,7 +39,7 @@ export const readSelectedPost = async postId => {
 
 export const readPosts = async page => {
     const setQuery =
-        "SELECT POSTS.id, title, DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') as timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id LIMIT ? OFFSET ?";
+        "SELECT POSTS.id, title, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id LIMIT ? OFFSET ?";
     const result = await runQuery(setQuery, [5, page * 5]);
     if (result) {
         const posts = [];
