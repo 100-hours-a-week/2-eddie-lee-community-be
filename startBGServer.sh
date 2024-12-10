@@ -61,7 +61,7 @@ start_server() {
 EOF
 
     echo "백그라운드에서 $name 서버를 시작합니다."
-    npm start &
+    nohup npm start &
 
     local max_wait=30
     local wait_interval=1
@@ -101,7 +101,5 @@ read -p "데이터 베이스 서버의 ip를 입력해주세요: " DATABASE
 echo "서버의 정보를 초기화하고 있습니다."
 
 start_server $BLUE_PORT "Blue" "backend-main"
-
-sed -i "s/^PORT=.*/PORT=$GREEN_PORT/" .env
 
 start_server $GREEN_PORT "Green" "backend-feature"
