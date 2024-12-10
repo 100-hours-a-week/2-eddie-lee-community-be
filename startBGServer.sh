@@ -5,34 +5,69 @@ source /etc/environment
 read -p "Blue 서버를 실행할 포트를 입력해주세요." BLUE_PORT
 read -p "Green 서버를 실행할 포트를 입력해주세요." GREEN_PORT
 
+kill_server() {
+    local port=$1
+    local name=$2
+
+    local pid=$(lsof -t -i :$port)
+    if [ -n "$pid" ]; then
+        echo "실행 중인 $name 서버(PID: $pid)를 종료합니다."
+        kill -9 $pid
+
+        # 종료 대기
+        local wait_time=0
+        local max_wait=30
+
+        while kill -0 $pid 2>/dev/null; do
+            sleep 1
+            wait_time=$((wait_time + 1))
+            if [ $wait_time -ge $max_wait ]; then
+                echo "$name 서버 종료에 실패했습니다. (시간 초과)"
+                exit 1
+            fi
+        done
+
+        echo "$name 서버 종료 완료."
+    else
+        echo "$name 서버는 실행 중이 아닙니다."
+    fi
+}
+
+start_server() {
+    local port=$1
+    local name=$2
+
+    echo "백그라운드에서 $name 서버를 시작합니다."
+    npm start &
+
+    local max_wait=30
+    local wait_interval=1
+    local total_wait=0
+
+    while ! nc -z localhost $port; do
+        sleep $wait_interval
+        total_wait=$((total_wait + wait_interval))
+
+        if [ $total_wait -ge $max_wait ]; then
+            echo "$name 서버 실행 실패..(Time Out)"
+            exit 1
+        fi
+    done
+
+    local start_pid=$(lsof -t -i :$port)
+    if [ -n "$start_pid" ]; then
+        echo "$name 서버가 $port 포트에서 실행되었습니다."
+    else
+        echo "$name 서버를 실행할 수 없습니다."
+        exit 1
+    fi
+}
+
 BLUE_PID=$(lsof -t -i :$BLUE_PORT)
 GREEN_PID=$(lsof -t -i :$GREEN_PORT)
 
-if [ -n "$BLUE_PID" ]; then
-	echo "실행중인 Blue 서버를 종료합니다."
-	kill -9 $BLUE_PID
-	if [ $? -eq 0 ]; then
-    		echo "Blue 서버 종료 완료."
-  	else
-    		echo "프로세스 종료 실패."
-	exit 1
-  	fi
-fi
-
-sleep 3
-
-if [ -n "$GREEN_PID"]; then
-    echo "실행중인 Green 서버를 종료합니다."
-    kill -9 $GREEN_PID
-    if [ $? -eq 0 ]; then
-    		echo "Green 서버 종료 완료."
-  	else
-    		echo "프로세스 종료 실패."
-	exit 1
-  	fi
-fi
-
-sleep 3
+kill_server $BLUE_PORT "Blue"
+kill_server $GREEN_PORT "Green"
 
 echo "서버를 시작합니다."
 echo "시작하기 위해 서버의 정보를 입력해주세요."
@@ -62,58 +97,8 @@ DB_HOST=$DATABASE
 CORS_URL=http://$SERVER
 EOF
 
-echo "백그라운드에서 Blue 서버를 시작합니다."
-
-npm start &
-
-MAX_WAIT=30
-WAIT_INTERVAL=1
-TOTAL_WAIT=0
-
-while ! nc -z localhost $BLUE_PORT; do
-	sleep $WAIT_INTERVAL
-	TOTAL_WAIT=$((TOTAL_WAIT + WAIT_INTERVAL))
-
-	if [ $TOTAL_WAIT -ge $MAX_WAIT ]; then
-		echo "Blue 서버 실행 실패..(Time Out)"
-		exit 1
-	fi
-done
-
-START_PID=$(lsof -t -i :$BLUE_PORT)
-
-if [ -n "$START_PID" ]; then
-	echo "Blue 서버가 $BLUE_PORT 포트에서 실행되었습니다."
-	exit 0
-else
-	echo "Blue 서버를 실행할 수 없습니다."
-	exit 1
-fi
-
-MAX_WAIT=30
-WAIT_INTERVAL=1
-TOTAL_WAIT=0
+start_server $BLUE_PORT "Blue"
 
 sed -i "s/^PORT=.*/PORT=$GREEN_PORT/" .env
 
-echo "백그라운드에서 Green 서버를 시작합니다."
-
-while ! nc -z localhost $GREEN_PORT; do
-	sleep $WAIT_INTERVAL
-	TOTAL_WAIT=$((TOTAL_WAIT + WAIT_INTERVAL))
-
-	if [ $TOTAL_WAIT -ge $MAX_WAIT ]; then
-		echo "Green 서버 실행 실패..(Time Out)"
-		exit 1
-	fi
-done
-
-START_PID=$(lsof -t -i :$GREEN_PORT)
-
-if [ -n "$START_PID" ]; then
-	echo "Green 서버가 $GREEN_PORT 포트에서 실행되었습니다."
-	exit 0
-else
-	echo "Green 서버를 실행할 수 없습니다."
-	exit 1
-fi
+start_server $GREEN_PORT "Green"
