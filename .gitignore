@@ -191,3 +191,5 @@ node_modules
 /data
 
 .vscode
+
+Dockerfile

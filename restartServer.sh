@@ -60,7 +60,7 @@ while ! nc -z localhost $PORT; do
 	TOTAL_WAIT=$((TOTAL_WAIT + WAIT_INTERVAL))
 
 	if [ $TOTAL_WAIT -ge $MAX_WAIT ]; then
-		ehco "서버 실행 실패..(Time Out)"
+		echo "서버 실행 실패..(Time Out)"
 		exit 1
 	fi
 done
