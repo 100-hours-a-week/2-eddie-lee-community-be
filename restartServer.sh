@@ -2,7 +2,7 @@
 
 source /etc/environment
 
-PORT=3000
+read -p "서버를 실행할 포트를 입력해주세요." PORT
 
 PID=$(lsof -t -i :$PORT)
 
@@ -42,7 +42,7 @@ DB_PASS=$DB_PASS
 DATABASE=$DB_NAME
 DB_PORT=$DB_PORT
 PROJECT_ROOT=<dynamic>
-PORT=$BE_PORT
+PORT=$PORT
 DB_HOST=$DATABASE
 CORS_URL=http://$SERVER
 EOF
@@ -51,7 +51,19 @@ echo "백그라운드에서 서버를 시작합니다."
 
 npm start &
 
-sleep 3
+MAX_WAIT=30
+WAIT_INTERVAL=1
+TOTAL_WAIT=0
+
+while ! nc -z localhost $PORT; do
+	sleep $WAIT_INTERVAL
+	TOTAL_WAIT=$((TOTAL_WAIT + WAIT_INTERVAL))
+
+	if [ $TOTAL_WAIT -ge $MAX_WAIT ]; then
+		ehco "서버 실행 실패..(Time Out)"
+		exit 1
+	fi
+done
 
 START_PID=$(lsof -t -i :$PORT)
 
