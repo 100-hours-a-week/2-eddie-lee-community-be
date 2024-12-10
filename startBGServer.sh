@@ -55,10 +55,10 @@ start_server() {
     DATABASE=$DB_NAME
     DB_PORT=$DB_PORT
     PROJECT_ROOT=<dynamic>
-    PORT=$BLUE_PORT
+    PORT=$port
     DB_HOST=$DATABASE
     CORS_URL=http://$SERVER
-    EOF
+EOF
 
     echo "백그라운드에서 $name 서버를 시작합니다."
     npm start &
