@@ -192,6 +192,4 @@ node_modules
 
 .vscode
 
-Dockerfile
-
 nohup.out
