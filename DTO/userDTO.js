@@ -1,12 +1,15 @@
 class CreateUserDTO {
     /**
-     * 회원가입시 새로운 유저를 등록하기 위한 DTO
+     * 로그인시 세션을 만들기 위한 DTO
      * @param {String} email - 유저의 이메일
      * @param {String} passwd - 유저 비밀번호
      * @param {String|null} profileImg - 유저의 프로필 이미지 URL
      * @param {String} nickname - 유저의 닉네임
      */
     constructor(email, passwd, profileImg, nickname) {
+        if (!email || !passwd || !nickname) {
+            throw new Error('필수 정보가 누락되었습니다.');
+        }
         this.email = email;
         this.passwd = passwd;
         this.profileImg = profileImg;
@@ -23,6 +26,9 @@ class ResponseUserDTO {
      * @param {string} nickname - 유저 닉네임
      */
     constructor(id, email, profileImg, nickname) {
+        if (!id) {
+            throw new Error('유저 ID가 없습니다.');
+        }
         this.id = id;
         this.email = email;
         this.profileImg = profileImg;

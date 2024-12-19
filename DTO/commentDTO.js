@@ -8,6 +8,9 @@ class CommentDTO {
      * @param {string} nickname - 작성자 닉네임
      */
     constructor(userId, commentId, content, timestamp, profileImg, nickname) {
+        if (!userId || !commentId) {
+            throw new Error('유저 ID나 댓글 ID가 없습니다.');
+        }
         this.userId = userId;
         this.commentId = commentId;
         this.content = content;
@@ -24,6 +27,9 @@ class CommentModifyDTO {
      * @param {string} content - 댓글 내용
      */
     constructor(commentId, postId, content) {
+        if (!commentId || !postId) {
+            throw new Error('게시글 ID나 댓글 ID가 없습니다.');
+        }
         this.commentId = commentId;
         this.postId = postId;
         this.content = content;

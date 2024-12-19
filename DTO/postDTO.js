@@ -20,6 +20,9 @@ class PostListDTO {
         profileImg,
         nickname,
     ) {
+        if (!id) {
+            throw new Error('게시글 ID가 없습니다.');
+        }
         this.id = id;
         this.title = title;
         this.timestamp = timestamp;
@@ -57,6 +60,9 @@ class PostDTO {
         view,
         comment_count,
     ) {
+        if (!user_id) {
+            throw new Error('유저 ID가 없습니다.');
+        }
         this.user_id = user_id;
         this.title = title;
         this.profileImg = profileImg;
