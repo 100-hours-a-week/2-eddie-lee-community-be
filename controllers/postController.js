@@ -10,7 +10,7 @@ const postFilePath = `${baseUrl}/data/posts`;
 export const resPostData = async (req, res, next) => {
     const postId = req.params.postId;
     try {
-        const postData = await postDAO.readSelectedPost(postId);
+        const postData = await postDAO.findSelectedPost(postId);
         res.status(200).json(postData);
     } catch (err) {
         next(err);
@@ -20,7 +20,7 @@ export const resPostData = async (req, res, next) => {
 export const getPostComments = async (req, res, next) => {
     try {
         const postId = req.params.postId;
-        const result = await commentDAO.getComments(postId);
+        const result = await commentDAO.findComments(postId);
         if (!result) {
             throw new Error('get comment failed');
         }
@@ -34,7 +34,10 @@ export const getCommentData = async (req, res, next) => {
     try {
         const postId = req.params.postId;
         const commentId = req.params.commentId;
-        const commentData = await commentDAO.readComment(postId, commentId);
+        const commentData = await commentDAO.findSelectedComment(
+            postId,
+            commentId,
+        );
         if (!commentData) {
             throw new Error('comment data does not exist');
         }
@@ -51,7 +54,7 @@ export const getCommentData = async (req, res, next) => {
 export const getPostList = async (req, res) => {
     try {
         const { page } = req.query;
-        const getPostData = await postDAO.readPosts(page);
+        const getPostData = await postDAO.findPosts(page);
         res.status(200).json(getPostData);
     } catch (err) {
         res.status(404).json({

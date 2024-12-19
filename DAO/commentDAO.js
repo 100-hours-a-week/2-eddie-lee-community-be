@@ -15,7 +15,7 @@ export const addComment = async commentData => {
     return true;
 };
 
-export const getComments = async postId => {
+export const findComments = async postId => {
     const setQuery =
         "SELECT COMMENTS.id, content, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, USERS.profile_img, USERS.nickname, user_id FROM COMMENTS LEFT JOIN USERS ON COMMENTS.user_id = USERS.id WHERE post_id = ?";
     const result = await runQuery(setQuery, [postId]);
@@ -38,7 +38,7 @@ export const getComments = async postId => {
     return result;
 };
 
-export const readComment = async (postId, commentId) => {
+export const findSelectedComment = async (postId, commentId) => {
     const setQuery =
         'SELECT id, post_id, content FROM COMMENTS WHERE post_id = ? && id = ?';
     const result = await runQuery(setQuery, [postId, commentId]);

@@ -11,7 +11,7 @@ async function updateCommentCount(postId) {
     return true;
 }
 
-export const readSelectedPost = async postId => {
+export const findSelectedPost = async postId => {
     if (!(await updateCommentCount(postId))) {
         throw new Error('update comment count fail');
     }
@@ -37,7 +37,7 @@ export const readSelectedPost = async postId => {
     }
 };
 
-export const readPosts = async page => {
+export const findPosts = async page => {
     const setQuery =
         "SELECT POSTS.id, title, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id LIMIT ? OFFSET ?";
     const result = await runQuery(setQuery, [5, page * 5]);

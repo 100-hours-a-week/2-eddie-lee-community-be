@@ -1,4 +1,15 @@
 class PostListDTO {
+    /**
+     * 게시글 목록을 가져오기 위한 DTO
+     * @param {int} id - 게시글 ID
+     * @param {string} title - 게시글 제목
+     * @param {string} timestamp - 작성 시간
+     * @param {int} likes - 좋아요 수
+     * @param {int} comment_counts - 댓글 수
+     * @param {int} views - 조회 수
+     * @param {string|null} profileImg - 작성자의 프로필 이미지 URL
+     * @param {string} nickname - 작성자 닉네임
+     */
     constructor(
         id,
         title,
@@ -21,6 +32,19 @@ class PostListDTO {
 }
 
 class PostDTO {
+    /**
+     * 게시글 상세 정보를 가져오기 위한 DTO
+     * @param {int} user_id - 게시글 작성자 ID
+     * @param {string} title - 게시글 제목
+     * @param {string|null} profileImg - 작성자의 프로필 이미지 URL
+     * @param {string} nickname - 작성자 닉네임
+     * @param {string} timestamp - 작성 시간
+     * @param {string|null} image - 게시글에 첨부된 사진 URL
+     * @param {string} content - 게시글 내용
+     * @param {int} likes - 좋아요 수
+     * @param {int} comment_counts - 댓글 수
+     * @param {int} views - 조회 수
+     */
     constructor(
         user_id,
         title,

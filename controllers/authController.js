@@ -10,7 +10,7 @@ export const isDuplicate = async (req, res, next) => {
         if (!type || !input) {
             throw new Error(`invalid data type`);
         }
-        const result = await userDAO.findDuplicate(type, input);
+        const result = await userDAO.findIsDuplicate(type, input);
         if (result) {
             res.status(200).json({
                 message: 'check duplicate success',

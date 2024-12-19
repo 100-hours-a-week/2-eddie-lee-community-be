@@ -50,7 +50,7 @@ export const updatePasswd = async userData => {
     return result ? true : false;
 };
 
-export const findDuplicate = async (dataType, data) => {
+export const findIsDuplicate = async (dataType, data) => {
     const setQuery = `SELECT ${dataType} FROM USERS WHERE ${dataType} = \'${data}\'`;
     const result = await runQuery(setQuery, []);
     return result.length ? true : false;
