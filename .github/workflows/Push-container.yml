@@ -22,7 +22,7 @@ jobs:
         PROJECT_ROOT=<dynamic> \
         PORT=${{secrets.BACKEND_PORT}} \
         CORS_URL=${{secrets.CORS_URL}} \
-        CDN_URL=${{secrets.CDN_URL}}> .env
+        CDN_URL=${{secrets.CDN_URL}}" > .env
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
     - name: AWS ECR Login
