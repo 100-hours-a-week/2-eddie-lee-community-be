@@ -39,5 +39,5 @@ jobs:
       run: |
         docker buildx build \
           --platform linux/amd64,linux/arm64 \
-          -t ${{secrets.AWS_ACCOUNT}}/community:backend \
-          --push .
+          --push \
+          -t ${{secrets.AWS_ACCOUNT}}/community:backend .
