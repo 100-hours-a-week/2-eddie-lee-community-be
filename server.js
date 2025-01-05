@@ -12,7 +12,7 @@ const port = process.env.PORT;
 const router = express.Router();
 app.use(
     cors({
-        origin: [process.env.CORS_URL, 'http://dq5lukp1ccg9d.cloudfront.net'], // 허용할 도메인
+        origin: [process.env.CORS_URL, process.env.CDN_URL], // 허용할 도메인
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // 허용할 HTTP 메서드
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true, // 쿠키를 포함한 요청을 허용하려면 true로 설정
