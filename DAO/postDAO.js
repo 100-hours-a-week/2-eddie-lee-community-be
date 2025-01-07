@@ -11,7 +11,7 @@ async function updateCommentCount(postId) {
     return true;
 }
 
-export const findSelectedPost = async postId => {
+export const findSelectedPost = async (postId, userId) => {
     if (!(await updateCommentCount(postId))) {
         throw new Error('update comment count fail');
     }
