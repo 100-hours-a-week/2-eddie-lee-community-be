@@ -52,7 +52,7 @@ export const getCommentData = async (req, res, next) => {
 
 export const editPostLike = async (req, res, next) => {
     const postId = req.params.postId;
-    const userId = req.session.user_id;
+    const userId = req.session.user.user_id;
     try {
         (await postDAO.addPostLike(postId, userId))
             ? res
