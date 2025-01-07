@@ -187,7 +187,7 @@ export const deleteLike = async (req, res, next) => {
     const postId = req.params.postId;
     const userId = req.session.user.user_id;
     try {
-        (await postDAO.deletePostLike(postId, user_id))
+        (await postDAO.deletePostLike(postId, userId))
             ? res
                   .status(200)
                   .json({ message: 'Update like complete', data: null })
