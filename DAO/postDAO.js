@@ -39,7 +39,7 @@ export const findSelectedPost = async postId => {
 
 export const findPosts = async page => {
     const setQuery =
-        "SELECT POSTS.id, title, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id LIMIT ? OFFSET ?";
+        "SELECT POSTS.id, title, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id ORDER BY POSTS.id DESC LIMIT ? OFFSET ?";
     const result = await runQuery(setQuery, [5, page * 5]);
     if (result) {
         const posts = [];
