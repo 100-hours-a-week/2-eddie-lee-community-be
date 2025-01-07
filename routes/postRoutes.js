@@ -9,6 +9,7 @@ postRouter.get('/:postId/data', postController.resPostData);
 postRouter.get('/', postController.getPostList);
 postRouter.get('/:postId/comments', postController.getPostComments);
 postRouter.get('/:postId/comments/:commentId', postController.getCommentData);
+postRouter.get('/:postId/like', postController.editPostLike);
 
 //POST
 postRouter.post(
@@ -26,10 +27,10 @@ postRouter.patch(
 );
 postRouter.patch('/:postId/comments/:commentId', postController.modifyComment);
 postRouter.patch('/:postId/view', postController.updateView);
-postRouter.patch('/:postId/like', postController.updateLike);
 
 //DELETE
 postRouter.delete('/:postId', postController.deletePost);
 postRouter.delete('/comments/:commentId', postController.deleteComment);
+postRouter.delete('/:postId/like', postController.deleteLike);
 
 export default postRouter;

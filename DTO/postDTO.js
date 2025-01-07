@@ -44,9 +44,10 @@ class PostDTO {
      * @param {string} timestamp - 작성 시간
      * @param {string|null} image - 게시글에 첨부된 사진 URL
      * @param {string} content - 게시글 내용
-     * @param {int} likes - 좋아요 수
-     * @param {int} comment_counts - 댓글 수
-     * @param {int} views - 조회 수
+     * @param {int} like - 좋아요 수
+     * @param {int} comment_count - 댓글 수
+     * @param {int} view - 조회 수
+     * @param {boolean} isLike - 좋아요 눌렀는지 여부
      */
     constructor(
         user_id,
@@ -59,6 +60,7 @@ class PostDTO {
         like,
         view,
         comment_count,
+        isLike,
     ) {
         if (!user_id) {
             throw new Error('유저 ID가 없습니다.');
@@ -73,6 +75,7 @@ class PostDTO {
         this.like = like;
         this.view = view;
         this.comment_count = comment_count;
+        this.isLike = isLike;
     }
 }
 

@@ -16,8 +16,9 @@ export const findSelectedPost = async postId => {
         throw new Error('update comment count fail');
     }
     const setQuery =
-        "SELECT USERS.id as id, title, USERS.profile_img, USERS.nickname, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, image, content, post_like, post_view, comment_count FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id = ?";
+        "SELECT USERS.id AS id, title, USERS.profile_img, USERS.nickname, DATE_FORMAT(CONVERT_TZ(POSTS.timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, image, content, (SELECT COUNT(*) FROM LIKES WHERE LIKES.post_id = POSTS.id) AS post_like, post_view, comment_count, (SELECT EXISTS(SELECT 1 FROM LIKES WHERE POSTS.id = LIKES.post_id & USERS.id = LIKES.user_id)) as isLike FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id WHERE POSTS.id = ?";
     const result = await runQuery(setQuery, [postId]);
+    result[0].isLike = result[0].isLike ? true : false;
     if (result) {
         const post = new PostDTO(
             result[0].id,
@@ -30,6 +31,7 @@ export const findSelectedPost = async postId => {
             result[0].post_like,
             result[0].post_view,
             result[0].comment_count,
+            result[0].isLike,
         );
         return post;
     } else {
@@ -39,7 +41,7 @@ export const findSelectedPost = async postId => {
 
 export const findPosts = async page => {
     const setQuery =
-        "SELECT POSTS.id, title, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id ORDER BY POSTS.id DESC LIMIT ? OFFSET ?";
+        "SELECT POSTS.id, title, DATE_FORMAT(CONVERT_TZ(timestamp, '+00:00', '+09:00'), '%Y-%m-%d %H:%i:%s') AS timestamp, (SELECT COUNT(*) FROM LIKES WHERE LIKES.post_id = POSTS.id) AS post_like, comment_count, post_view, USERS.profile_img, USERS.nickname FROM POSTS LEFT JOIN USERS ON POSTS.user_id = USERS.id ORDER BY POSTS.id DESC LIMIT ? OFFSET ?";
     const result = await runQuery(setQuery, [5, page * 5]);
     if (result) {
         const posts = [];
@@ -102,9 +104,18 @@ export const updatePostView = async postId => {
     return true;
 };
 
-export const updatePostLike = async postId => {
-    const setQuery = 'UPDATE POSTS SET post_like = post_like + 1 WHERE id = ?';
-    const result = await runQuery(setQuery, [postId]);
+export const addPostLike = async (postId, userId) => {
+    const setQuery = 'INSERT INTO LIKES (post_id, user_id) VALUES (?, ?)';
+    const result = await runQuery(setQuery, [postId, userId]);
+    if (!result) {
+        throw new Error('update like fail');
+    }
+    return true;
+};
+
+export const deletePostLike = async (postId, userId) => {
+    const setQuery = 'DELETE FROM LIKES WHERE post_id = ? & user_id = ?';
+    const result = await runQuery(setQuery, [postId, userId]);
     if (!result) {
         throw new Error('update like fail');
     }

@@ -50,6 +50,20 @@ export const getCommentData = async (req, res, next) => {
     }
 };
 
+export const editPostLike = async (req, res, next) => {
+    const postId = req.params.postId;
+    const userId = req.session.user_id;
+    try {
+        (await postDAO.addPostLike(postId, userId))
+            ? res
+                  .status(200)
+                  .json({ message: 'Update like complete', data: null })
+            : res.status(404).json({ message: 'update like fail', data: null });
+    } catch (err) {
+        next(err);
+    }
+};
+
 //POST
 export const getPostList = async (req, res) => {
     try {
@@ -168,10 +182,12 @@ export const updateView = async (req, res) => {
     }
 };
 
-export const updateLike = async (req, res, next) => {
+//DELETE
+export const deleteLike = async (req, res, next) => {
     const postId = req.params.postId;
+    const userId = req.session.user.user_id;
     try {
-        (await postDAO.updatePostLike(postId))
+        (await postDAO.deletePostLike(postId, user_id))
             ? res
                   .status(200)
                   .json({ message: 'Update like complete', data: null })
@@ -181,7 +197,6 @@ export const updateLike = async (req, res, next) => {
     }
 };
 
-//DELETE
 export const deletePost = async (req, res, next) => {
     try {
         const postId = req.params.postId;
