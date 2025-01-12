@@ -4,11 +4,9 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 
-RUN npm install --production
+RUN npm install
 
 COPY . .
-
-COPY .env .env
 
 ENV PORT=3000
 
