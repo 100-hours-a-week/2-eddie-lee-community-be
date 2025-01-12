@@ -8,6 +8,8 @@ RUN npm install --production
 
 COPY . .
 
+COPY .env .env
+
 ENV PORT=3000
 
 EXPOSE $PORT
