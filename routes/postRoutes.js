@@ -1,6 +1,9 @@
 import express from 'express';
 import * as postController from '../controllers/postController.js';
-import { uploadPostImg } from '../middleware/uploadMiddleware.js';
+import {
+    uploadPostImg,
+    handlePostImgUpload,
+} from '../middleware/uploadMiddleware.js';
 
 const postRouter = express.Router();
 
@@ -15,6 +18,7 @@ postRouter.get('/:postId/like', postController.editPostLike);
 postRouter.post(
     '/edit',
     uploadPostImg.single('inputImg'),
+    handlePostImgUpload,
     postController.editPost,
 );
 postRouter.post('/:postId/comment', postController.editComment);
@@ -23,6 +27,7 @@ postRouter.post('/:postId/comment', postController.editComment);
 postRouter.patch(
     '/:postId',
     uploadPostImg.single('inputImg'),
+    handlePostImgUpload,
     postController.modifyPost,
 );
 postRouter.patch('/:postId/comments/:commentId', postController.modifyComment);

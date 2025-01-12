@@ -1,6 +1,9 @@
 import express from 'express';
 import * as userController from '../controllers/userController.js';
-import { uploadProfileImg } from '../middleware/uploadMiddleware.js';
+import {
+    uploadProfileImg,
+    handleProfileImgUpload,
+} from '../middleware/uploadMiddleware.js';
 
 const userRouter = express.Router();
 
@@ -11,6 +14,7 @@ userRouter.get('/session', userController.getUserSession);
 userRouter.patch(
     '/',
     uploadProfileImg.single('profileImg'),
+    handleProfileImgUpload,
     userController.modifyUser,
 );
 userRouter.patch(
