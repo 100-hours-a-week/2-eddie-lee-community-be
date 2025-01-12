@@ -20,6 +20,10 @@ const env = {
     DB_PORT: process.env.DB_PORT,
     DATABASE: process.env.DATABASE,
     CORS_URL: process.env.CORS_URL,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    AWS_REGION: process.env.AWS_REGION,
+    AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
 };
 
 export default env;
