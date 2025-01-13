@@ -54,6 +54,7 @@ const handleProfileImgUpload = async (req, res, next) => {
         }
 
         const fileName = Date.now() + '-' + req.file.originalname;
+        req.file.filename = fileName;
         const s3Response = await uploadToS3(
             req.file.buffer,
             'public/images/profileImages',
@@ -78,6 +79,7 @@ const handlePostImgUpload = async (req, res, next) => {
         }
 
         const fileName = Date.now() + '-' + req.file.originalname;
+        req.file.filename = fileName;
         const s3Response = await uploadToS3(
             req.file.buffer,
             'public/images/postImages',
