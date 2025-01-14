@@ -16,12 +16,11 @@ export const isDuplicate = async (req, res, next) => {
                 message: 'check duplicate success',
                 data: true,
             });
-        } else {
-            res.status(200).json({
-                message: 'check duplicate success',
-                data: false,
-            });
         }
+        res.status(200).json({
+            message: 'check duplicate success',
+            data: false,
+        });
     } catch (err) {
         res.status(404).json({
             message: 'check duplicate fail',
@@ -43,19 +42,19 @@ export const login = async (req, res, next) => {
                 message: 'no user exist.',
                 login_result: 'failed',
             });
-        } else {
-            console.log('login success');
-            req.session.user = {
-                user_id: authUser.id,
-                nickname: authUser.nickname,
-                profileImg: authUser.profileImg,
-                email: authUser.email,
-            };
-            res.status(200).json({
-                message: 'Login success',
-                data: null,
-            });
         }
+
+        console.log('login success');
+        req.session.user = {
+            user_id: authUser.id,
+            nickname: authUser.nickname,
+            profileImg: authUser.profileImg,
+            email: authUser.email,
+        };
+        res.status(200).json({
+            message: 'Login success',
+            data: null,
+        });
     } catch (err) {
         next(err);
     }
@@ -75,14 +74,13 @@ export const signup = async (req, res, next) => {
             nickname: textData.nickname,
         };
         const result = await userDAO.addUser(addUserData);
-        if (result) {
-            res.status(200).json({
-                message: 'signup success',
-                data: null,
-            });
-        } else {
+        if (!result) {
             throw new Error(`signup failed..`);
         }
+        res.status(200).json({
+            message: 'signup success',
+            data: null,
+        });
     } catch (err) {
         next(err);
     }

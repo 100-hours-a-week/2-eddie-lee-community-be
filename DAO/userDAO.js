@@ -5,17 +5,13 @@ export const login = async (email, passwd) => {
     const setQuery =
         'SELECT id, email, profile_img, nickname FROM USERS WHERE email = ? && passwd = ?';
     const result = await runQuery(setQuery, [email, passwd]);
-    if (result) {
-        const userData = new ResponseUserDTO(
-            result[0].id,
-            result[0].email,
-            result[0].profile_img,
-            result[0].nickname,
-        );
-        return userData;
-    } else {
-        throw new Error('login failed in db..');
-    }
+    const userData = new ResponseUserDTO(
+        result[0].id,
+        result[0].email,
+        result[0].profile_img,
+        result[0].nickname,
+    );
+    return userData;
 };
 
 export const addUser = async userData => {
@@ -27,7 +23,7 @@ export const addUser = async userData => {
         userData.profile_img,
         userData.nickname,
     ]);
-    return result ? true : false;
+    return result.length > 0;
 };
 
 export const updateUser = async userData => {
@@ -38,7 +34,7 @@ export const updateUser = async userData => {
         userData.nickname,
         userData.user_id,
     ]);
-    return result ? true : false;
+    return result.length > 0;
 };
 
 export const updatePasswd = async userData => {
@@ -47,13 +43,17 @@ export const updatePasswd = async userData => {
         userData.passwd,
         userData.user_id,
     ]);
-    return result ? true : false;
+    return result.length > 0;
 };
 
 export const findIsDuplicate = async (dataType, data) => {
-    const setQuery = `SELECT ${dataType} FROM USERS WHERE ${dataType} = \'${data}\'`;
-    const result = await runQuery(setQuery, []);
-    return result.length ? true : false;
+    const allowedColumns = ['email', 'nickname'];
+    if (!allowedColumns.includes(dataType)) {
+        throw new Error(`Invalid data type: ${dataType}`);
+    }
+    const setQuery = `SELECT ${dataType} FROM USERS WHERE ${dataType} = ?`;
+    const result = await runQuery(setQuery, [data]);
+    return result.length > 0;
 };
 
 export const deleteUser = async userId => {
