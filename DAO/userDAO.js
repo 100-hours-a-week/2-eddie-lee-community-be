@@ -7,14 +7,15 @@ export const login = async (email, passwd) => {
         'SELECT id, email, profile_img, nickname, passwd FROM USERS WHERE email = ?';
     const result = await runQuery(setQuery, [email]);
     const passwdIsMatch = await bcrypt.compare(passwd, result[0].passwd);
-    if (passwdIsMatch) {
-        const userData = new ResponseUserDTO(
-            result[0].id,
-            result[0].email,
-            result[0].profile_img,
-            result[0].nickname,
-        );
+    if (!passwdIsMatch) {
+        throw new Error('Invalid email or password');
     }
+    const userData = new ResponseUserDTO(
+        result[0].id,
+        result[0].email,
+        result[0].profile_img,
+        result[0].nickname,
+    );
     return userData;
 };
 
