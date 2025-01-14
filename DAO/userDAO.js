@@ -1,20 +1,25 @@
 import { runQuery } from '../config/db.js';
 import { ResponseUserDTO } from '../DTO/userDTO.js';
+import bcrypt from 'bcryptjs';
 
 export const login = async (email, passwd) => {
     const setQuery =
-        'SELECT id, email, profile_img, nickname FROM USERS WHERE email = ? && passwd = ?';
-    const result = await runQuery(setQuery, [email, passwd]);
-    const userData = new ResponseUserDTO(
-        result[0].id,
-        result[0].email,
-        result[0].profile_img,
-        result[0].nickname,
-    );
+        'SELECT id, email, profile_img, nickname FROM USERS WHERE email = ?';
+    const result = await runQuery(setQuery, [email]);
+    const passwdIsMatch = await bcrypt.compare(passwd, result[0].passwd);
+    if (passwdIsMatch) {
+        const userData = new ResponseUserDTO(
+            result[0].id,
+            result[0].email,
+            result[0].profile_img,
+            result[0].nickname,
+        );
+    }
     return userData;
 };
 
 export const addUser = async userData => {
+    userData.passwd = await bcrypt.hash(userData.passwd, 10);
     const setQuery =
         'INSERT INTO USERS (email, passwd, profile_img, nickname) VALUES (?, ?, ?, ?)';
     const result = await runQuery(setQuery, [
@@ -23,7 +28,7 @@ export const addUser = async userData => {
         userData.profile_img,
         userData.nickname,
     ]);
-    return result.length > 0;
+    return result.affectedRows > 0;
 };
 
 export const updateUser = async userData => {
@@ -38,6 +43,7 @@ export const updateUser = async userData => {
 };
 
 export const updatePasswd = async userData => {
+    userData.passwd = await bcrypt.hash(userData.passwd, 10);
     const setQuery = 'UPDATE USERS SET passwd = ? WHERE id = ?';
     const result = await runQuery(setQuery, [
         userData.passwd,
