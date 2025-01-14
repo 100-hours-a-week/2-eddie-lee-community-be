@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 export const login = async (email, passwd) => {
     const setQuery =
-        'SELECT id, email, profile_img, nickname FROM USERS WHERE email = ?';
+        'SELECT id, email, profile_img, nickname, passwd FROM USERS WHERE email = ?';
     const result = await runQuery(setQuery, [email]);
     const passwdIsMatch = await bcrypt.compare(passwd, result[0].passwd);
     if (passwdIsMatch) {
