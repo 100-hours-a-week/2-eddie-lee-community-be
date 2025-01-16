@@ -12,12 +12,12 @@ export const isDuplicate = async (req, res, next) => {
         }
         const result = await userDAO.findIsDuplicate(type, input);
         if (result) {
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'check duplicate success',
                 data: true,
             });
         }
-        res.status(200).json({
+        return res.status(200).json({
             message: 'check duplicate success',
             data: false,
         });
@@ -38,7 +38,7 @@ export const login = async (req, res, next) => {
         const authUser = await userDAO.login(email, passwd);
         if (!authUser || !authUser.id) {
             console.log('login failed');
-            res.status(401).json({
+            return res.status(401).json({
                 message: 'no user exist.',
                 login_result: 'failed',
             });
@@ -51,7 +51,7 @@ export const login = async (req, res, next) => {
             profileImg: authUser.profileImg,
             email: authUser.email,
         };
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Login success',
             data: null,
         });

@@ -17,11 +17,7 @@ userRouter.patch(
     handleProfileImgUpload,
     userController.modifyUser,
 );
-userRouter.patch(
-    '/passwd',
-    uploadProfileImg.none(),
-    userController.modifyUserPasswd,
-);
+userRouter.patch('/passwd', userController.modifyUserPasswd);
 
 //DELETE
 userRouter.delete('/', userController.deleteUser);
