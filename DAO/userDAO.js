@@ -35,22 +35,22 @@ export const addUser = async userData => {
 export const updateUser = async userData => {
     const setQuery =
         'UPDATE USERS SET profile_img = ?, nickname = ? WHERE id = ?';
-    const result = await runQuery(setQuery, [
+    const [result] = await runQuery(setQuery, [
         userData.profile_img,
         userData.nickname,
         userData.user_id,
     ]);
-    return result.length > 0;
+    return result.affectedRows > 0;
 };
 
 export const updatePasswd = async userData => {
     userData.passwd = await bcrypt.hash(userData.passwd, 10);
     const setQuery = 'UPDATE USERS SET passwd = ? WHERE id = ?';
-    const result = await runQuery(setQuery, [
+    const [result] = await runQuery(setQuery, [
         userData.passwd,
         userData.user_id,
     ]);
-    return result.length > 0;
+    return result.affectedRows > 0;
 };
 
 export const findIsDuplicate = async (dataType, data) => {
