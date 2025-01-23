@@ -83,7 +83,7 @@ jobs:
           echo "target_environment=$TARGET_ENV" >> $GITHUB_OUTPUT
     - name: Upload app.zip to S3
       run: |
-        aws s3 cp app.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }} /app.zip
+        aws s3 cp app.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/app.zip
     - name: Create new application version
       run: |
         VERSION=$(date +'%Y%m%d%H%M%S')
