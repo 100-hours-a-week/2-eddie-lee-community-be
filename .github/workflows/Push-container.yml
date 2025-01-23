@@ -57,11 +57,6 @@ jobs:
     - name: Check Green Environment
       id: check_env
       run: |
-        ACTIVE_CNAME=$(aws elasticbeanstalk describe-environments \
-          --application-name webserver \
-          --query "Environments[?Status=='Ready'].[CNAME]" \
-          --output text)
-        echo "Active CNAME is $ACTIVE_CNAME"
         BLUE_ENV=$(aws elasticbeanstalk describe-environments \
           --application-name webserver \
           --query "Environments[?Status=='Ready' && CNAME=='Webserver-env.eba-hnmitjzy.ap-northeast-2.elasticbeanstalk.com'].[EnvironmentName]" \
@@ -70,6 +65,7 @@ jobs:
           echo "Error: Could not determine active environment."
           exit 1
         fi
+          echo "Now Blue is $BLUE_ENV"
           echo "active_environment=$BLUE_ENV" >> $GITHUB_OUTPUT
 
     #배포할 환경 이름
