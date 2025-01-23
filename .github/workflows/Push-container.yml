@@ -47,7 +47,8 @@ jobs:
         docker buildx build \
           --platform linux/amd64,linux/arm64 \
           --push \
-          -t ${{secrets.AWS_ACCOUNT}}/community:backend-$VERSION .
+          -t ${{secrets.AWS_ACCOUNT}}/community:backend-$VERSION \
+          -t ${{secrets.AWS_ACCOUNT}}/community:backend-latest .
     #Beanstalk 배포 추가
 
     - name: Create Beanstalk File
@@ -61,7 +62,7 @@ jobs:
           --query "Environments[?Status=='Ready'].[CNAME]" \
           --output text)
         echo "Active CNAME is $ACTIVE_CNAME"
-        GREEN_ENV=$(aws elasticbeanstalk describe-environments \
+        BLUE_ENV=$(aws elasticbeanstalk describe-environments \
           --application-name webserver \
           --query "Environments[?Status=='Ready' && CNAME=='Webserver-env.eba-hnmitjzy.ap-northeast-2.elasticbeanstalk.com'].[EnvironmentName]" \
           --output text)
@@ -69,7 +70,7 @@ jobs:
           echo "Error: Could not determine active environment."
           exit 1
         fi
-          echo "active_environment=$GREEN_ENV" >> $GITHUB_OUTPUT
+          echo "active_environment=$BLUE_ENV" >> $GITHUB_OUTPUT
 
     #배포할 환경 이름
     - name: Choose Env
@@ -77,10 +78,13 @@ jobs:
       run: |
         if [[ "${{ steps.check_env.outputs.active_environment }}" == "Webserver-env" ]]; then
           TARGET_ENV="Webserver-env-Green"
+          CURRENT_ENV="Webserver-env"
         else
           TARGET_ENV="Webserver-env"
+          CURRENT_ENV="Webserver-env-Green"
         fi
-          echo "target_environment=$TARGET_ENV" >> $GITHUB_OUTPUT
+        echo "target_environment=$TARGET_ENV" >> $GITHUB_OUTPUT
+        echo "current_environment=$CURRENT_ENV" >> $GITHUB_OUTPUT
     - name: Upload app.zip to S3
       run: |
         aws s3 cp app.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/app.zip
@@ -100,3 +104,15 @@ jobs:
         aws elasticbeanstalk update-environment \
           --environment-name "${{ steps.choose_env.outputs.target_environment }}" \
           --version-label ${{ steps.create_version.outputs.version }}
+    #Green 환경 기다리기
+    - name: Wait for Green Env
+      run: |
+        aws elasticbeanstalk wait environment-updated \
+          --application-name webserver \
+          --environment-name ${{ steps.choose_env.outputs.target_environment }}
+    #Blue-Green CNAME 스왑
+    - name: Swap Blue-Green
+      run: |
+        aws elasticbeanstalk swap-environment-cnames \
+          --source-environment-name ${{ steps.choose_env.outputs.current_environment }} \
+          --destination-environment-name ${{ steps.choose_env.outputs.target_environment }}
