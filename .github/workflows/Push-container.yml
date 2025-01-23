@@ -43,7 +43,59 @@ jobs:
       run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT}}
     - name: Push Container
       run: |
+        VERSION=$(date +'%Y%m%d%H%M%S')
         docker buildx build \
           --platform linux/amd64,linux/arm64 \
           --push \
-          -t ${{secrets.AWS_ACCOUNT}}/community:backend .
+          -t ${{secrets.AWS_ACCOUNT}}/community:backend-$VERSION .
+    #Beanstalk 배포 추가
+
+    - name: Create Beanstalk File
+      run: zip -r app.zip Dockerrun.aws.json docker-compose.yml
+    #배포된 환경의 CNAME 조회
+    - name: Check Green Environment
+      id: check_env
+      run: |
+        ACTIVE_CNAME=$(aws elasticbeanstalk describe-environments \
+          --application-name webserver \
+          --query "Environments[?Status=='Ready'].[CNAME]" \
+          --output text)
+        echo "Active CNAME is $ACTIVE_CNAME"
+        GREEN_ENV=$(aws elasticbeanstalk describe-environments \
+          --application-name webserver \
+          --query "Environments[?Status=='Ready' && CNAME=='Webserver-env.eba-hnmitjzy.ap-northeast-2.elasticbeanstalk.com'].[EnvironmentName]" \
+          --output text)
+        if [ -z "$GREEN_ENV" ]; then
+          echo "Error: Could not determine active environment."
+          exit 1
+        fi
+          echo "active_environment=$GREEN_ENV" >> $GITHUB_OUTPUT
+
+    #배포할 환경 이름
+    - name: Choose Env
+      id: choose_env
+      run: |
+        if [[ "${{ steps.check_env.outputs.active_environment }}" == "Webserver-env" ]]; then
+          TARGET_ENV="Webserver-env-Green"
+        else
+          TARGET_ENV="Webserver-env"
+        fi
+          echo "target_environment=$TARGET_ENV" >> $GITHUB_OUTPUT
+    - name: Upload app.zip to S3
+      run: |
+        aws s3 cp app.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }} /app.zip
+    - name: Create new application version
+      run: |
+        VERSION=$(date +'%Y%m%d%H%M%S')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        aws elasticbeanstalk create-application-version \
+          --application-name webserver \
+          --version-label $VERSION \
+          --source-bundle S3Bucket=${{ secrets.AWS_S3_BUCKET_NAME }},S3Key=app.zip
+    #선택한 환경에 배포
+    - name: Deploy App
+      run: |
+        echo "Deploying to ${{ steps.choose_env.outputs.target_environment }}"
+        aws elasticbeanstalk update-environment \
+          --environment-name "${{ steps.choose_env.outputs.target_environment }}" \
+          --version-label ${{ steps.create_version.outputs.version }}
