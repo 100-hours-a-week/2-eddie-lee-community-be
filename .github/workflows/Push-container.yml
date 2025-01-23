@@ -66,7 +66,7 @@ jobs:
           --application-name webserver \
           --query "Environments[?Status=='Ready' && CNAME=='Webserver-env.eba-hnmitjzy.ap-northeast-2.elasticbeanstalk.com'].[EnvironmentName]" \
           --output text)
-        if [ -z "$GREEN_ENV" ]; then
+        if [ -z "$BLUE_ENV" ]; then
           echo "Error: Could not determine active environment."
           exit 1
         fi
