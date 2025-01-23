@@ -85,6 +85,7 @@ jobs:
       run: |
         aws s3 cp app.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/app.zip
     - name: Create new application version
+      id: create_version
       run: |
         VERSION=$(date +'%Y%m%d%H%M%S')
         echo "version=$VERSION" >> $GITHUB_OUTPUT
