@@ -1,0 +1,22 @@
+services:
+  nginx:
+    image: 148761655491.dkr.ecr.ap-northeast-2.amazonaws.com/community:frontend
+    container_name: nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    networks:
+      - eddie_network
+
+  backend:
+    image: 148761655491.dkr.ecr.ap-northeast-2.amazonaws.com/community:backend
+    container_name: backend
+    ports:
+      - '3000:3000'
+    networks:
+      - eddie_network
+
+networks:
+  eddie_network:
+    driver: bridge
