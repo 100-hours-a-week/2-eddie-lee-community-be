@@ -44,12 +44,12 @@ export const updateUser = async userData => {
 };
 
 export const updatePasswd = async userData => {
-    userData.passwd = await bcrypt.hash(userData.passwd, 10);
+    if (!userData || !userData.passwd) {
+        throw new Error('비밀번호가 제공되지 않았습니다.');
+    }
+    const hashedPasswd = await bcrypt.hash(userData.passwd, 10);
     const setQuery = 'UPDATE USERS SET passwd = ? WHERE id = ?';
-    const [result] = await runQuery(setQuery, [
-        userData.passwd,
-        userData.user_id,
-    ]);
+    const [result] = await runQuery(setQuery, [hashedPasswd, userData.user_id]);
     return result.affectedRows > 0;
 };
 
@@ -64,6 +64,9 @@ export const findIsDuplicate = async (dataType, data) => {
 };
 
 export const deleteUser = async userId => {
+    if (!userId) {
+        throw new Error('유저 ID를 찾을 수 없습니다.');
+    }
     const setQuery = `DELETE FROM USERS WHERE id = ?`;
     try {
         await runQuery(setQuery, [userId]);
