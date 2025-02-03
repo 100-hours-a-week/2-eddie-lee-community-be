@@ -10,7 +10,7 @@ services:
       - eddie_network
 
   backend:
-    image: 148761655491.dkr.ecr.ap-northeast-2.amazonaws.com/community:backend
+    image: 148761655491.dkr.ecr.ap-northeast-2.amazonaws.com/community:backend-latest
     container_name: backend
     ports:
       - '3000:3000'
