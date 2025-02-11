@@ -68,9 +68,6 @@ export const deleteUser = async userId => {
         throw new Error('유저 ID를 찾을 수 없습니다.');
     }
     const setQuery = `DELETE FROM USERS WHERE id = ?`;
-    try {
-        await runQuery(setQuery, [userId]);
-    } catch (err) {
-        console.error(err.message);
-    }
+    const result = await runQuery(setQuery, [userId]);
+    return result.affectedRows;
 };

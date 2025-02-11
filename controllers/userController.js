@@ -58,7 +58,6 @@ export const modifyUserPasswd = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const userId = req.session.user.user_id;
-        userDAO.deleteUser(userId);
         fs.unlink(req.session.user.profileImg, err => {
             if (err) {
                 console.error('Failed to delete file', err.message);
@@ -66,9 +65,11 @@ export const deleteUser = async (req, res, next) => {
                 console.log('Profile image delete success.');
             }
         });
-        res.json({ message: 'delete user success', data: null });
+        (await userDAO.deleteUser(userId))
+            ? res.json({ message: 'delete user success', data: null })
+            : res.status(404).json({ message: 'delete user fail', data: null });
     } catch (err) {
-        console.error(err.message);
+        next(err);
     }
 };
 
