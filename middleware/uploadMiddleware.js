@@ -44,6 +44,22 @@ const uploadToS3 = async (fileBuffer, bucketPath, fileName, mimeType) => {
     return s3.upload(params).promise();
 };
 
+// S3 이미지 삭제 함수
+const deleteFromS3 = async fileKey => {
+    const params = {
+        Bucket: env.AWS_S3_BUCKET_NAME,
+        Key: fileKey,
+    };
+
+    try {
+        await s3.deleteObject(params).promise();
+        console.log(`Delete file complete: ${fileKey}`);
+        return true;
+    } catch (error) {
+        console.error(`Delete file failed: ${fileKey}`, error);
+        return false;
+    }
+};
 // 프로필 이미지 업로드 미들웨어
 const handleProfileImgUpload = async (req, res, next) => {
     try {
@@ -99,4 +115,5 @@ export {
     uploadPostImg,
     handleProfileImgUpload,
     handlePostImgUpload,
+    deleteFromS3,
 };

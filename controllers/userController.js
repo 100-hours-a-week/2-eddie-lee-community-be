@@ -1,6 +1,6 @@
 import env from '../config/dotenv.js';
 import * as userDAO from '../DAO/userDAO.js';
-import fs from 'fs';
+import { deleteFromS3 } from '../middleware/uploadMiddleware.js';
 
 const baseUrl = env.API_BASE_URL;
 const rootDir = env.ROOT_DIR;
@@ -58,13 +58,17 @@ export const modifyUserPasswd = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const userId = req.session.user.user_id;
-        fs.unlink(req.session.user.profileImg, err => {
-            if (err) {
-                console.error('Failed to delete file', err.message);
-            } else {
-                console.log('Profile image delete success.');
+        const profileImgKey = req.session.user.profileImg;
+        if (profileImgKey) {
+            try {
+                await deleteFromS3(profileImgKey);
+            } catch (err) {
+                console.error(`S3 이미지 삭제 실패: ${profileImgKey}`, err);
+                return res
+                    .status(500)
+                    .json({ message: 'delete image failed', data: null });
             }
-        });
+        }
         (await userDAO.deleteUser(userId))
             ? res.json({ message: 'delete user success', data: null })
             : res.status(404).json({ message: 'delete user fail', data: null });

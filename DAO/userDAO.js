@@ -69,5 +69,5 @@ export const deleteUser = async userId => {
     }
     const setQuery = `DELETE FROM USERS WHERE id = ?`;
     const result = await runQuery(setQuery, [userId]);
-    return result.affectedRows;
+    return result.affectedRows > 0;
 };
